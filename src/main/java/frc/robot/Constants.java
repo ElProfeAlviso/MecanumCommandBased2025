@@ -29,4 +29,11 @@ public class Constants {
         // computadora del robot.
         public static final int PS4_CONTROLLER_PORT = 0;
     }
+
+
+    public static final class AutoParameters {
+        // Parámetros para el modo autónomo
+        public static final double AUTO_DRIVE_SPEED = 0.5; // Velocidad para conducir en modo autónomo
+        public static final double AUTO_DRIVE_DURATION = 2.0; // Duración en segundos para conducir en modo autónomo
+    }
 }

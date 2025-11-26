@@ -3,17 +3,23 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
-
+//Comandos de clase generales.
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 
+//Joysticks standard y por comandos.
+import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj.PS4Controller;
+
+//Clases de Subsistemas
 import frc.robot.subsystems.DriveTrain;
+
+//Clases de Comandos definidos por el usuario
 import frc.robot.commands.AutoDriveForward;
 import frc.robot.commands.AutoSequence;
 import frc.robot.commands.DriveWithJoystick;
 
-import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
+
 
 public class RobotContainer {
   // Instancias de subsistemas
@@ -62,6 +68,8 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     // Por ahora, solo imprime un mensaje indicando que no hay un comando autónomo
     // configurado
-    return Commands.print("No autonomous command configured");
+    Commands.print("Autonomous Selected");
+    
+    return new AutoSequence(driveTrain);
   }
 }

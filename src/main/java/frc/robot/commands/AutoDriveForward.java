@@ -39,7 +39,7 @@ public class AutoDriveForward extends Command {
   public void initialize() {
   cronos.start(); // Inicia el temporizador
   cronos.reset(); // Reinicia el temporizador
-  driveTrain.mecanumDrive_Cartesian(speed, 0, 0); // Comienza a mover el robot hacia adelante
+  
   }
 
   // Este método se llama repetidamente mientras el comando está programado.
@@ -56,12 +56,13 @@ public class AutoDriveForward extends Command {
   @Override
   public void end(boolean interrupted) {
   driveTrain.mecanumDrive_Cartesian(0, 0, 0); // Asegúrate de detener el robot
+  cronos.stop(); // Detén el temporizador
   }
 
   // Este método indica si el comando ha terminado.
   @Override
   public boolean isFinished() {
-  if (cronos.get() >= time) { // Si el tiempo transcurrido es mayor o igual al tiempo deseado
+  if (cronos.hasElapsed(time)) { // Si el tiempo transcurrido es mayor o igual al tiempo deseado
     return true; // El comando ha terminado
   } else {
     return false; // El comando aún no ha terminado

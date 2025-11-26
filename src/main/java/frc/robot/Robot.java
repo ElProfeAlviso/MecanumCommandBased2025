@@ -1,11 +1,16 @@
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
-
+// Define el paquete al que pertenece esta clase.
 package frc.robot;
 
+// Importa la clase TimedRobot, que proporciona una estructura básica para un robot basado en tiempo.
 import edu.wpi.first.wpilibj.TimedRobot;
+
+// Importa la interfaz Command, que representa una acción o conjunto de acciones que el robot puede realizar.
 import edu.wpi.first.wpilibj2.command.Command;
+
+// Importa el CommandScheduler, que se encarga de gestionar y ejecutar los comandos.
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 // La clase Robot es el punto de entrada principal para el programa del robot.

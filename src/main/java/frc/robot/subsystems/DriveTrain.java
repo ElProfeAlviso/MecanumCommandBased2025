@@ -1,19 +1,31 @@
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
-
+// Paquete donde se encuentra la clase DriveTrain
 package frc.robot.subsystems;
 
+// Importación de la clase SparkBase de la biblioteca REV Robotics
 import com.revrobotics.spark.SparkBase;
+
+// Importación de la enumeración MotorType para definir el tipo de motor (brushed o brushless)
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+
+// Importación de la clase SparkMax para controlar los motores Spark MAX
 import com.revrobotics.spark.SparkMax;
+
+// Importación de la configuración básica de SparkBase, incluyendo el modo de inactividad
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+
+// Importación de la clase SparkMaxConfig para configurar los motores Spark MAX
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+// Importación de la clase MecanumDrive para manejar la lógica de conducción Mecanum
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 
+// Importación de la clase SubsystemBase para definir subsistemas en el framework Command-Based
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+// Importación de la clase Constants que contiene las constantes del robot
 import frc.robot.Constants;
 
 public class DriveTrain extends SubsystemBase {
@@ -58,6 +70,7 @@ public class DriveTrain extends SubsystemBase {
     mecanumDrive.setMaxOutput(1.0); // Salida máxima del sistema de conducción
     mecanumDrive.setSafetyEnabled(true); // Habilitar el sistema de seguridad para evitar errores
     mecanumDrive.setExpiration(0.1); // Tiempo de expiración del sistema de seguridad
+    
   }
 
   /**
@@ -69,6 +82,8 @@ public class DriveTrain extends SubsystemBase {
   public void mecanumDrive_Cartesian(double xSpeed, double ySpeed, double zRotation) {
     mecanumDrive.driveCartesian(xSpeed, ySpeed, zRotation);
   }
+
+  
 
   @Override
   public void periodic() {

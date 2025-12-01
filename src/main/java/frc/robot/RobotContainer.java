@@ -52,6 +52,10 @@ public class RobotContainer {
 
   // Método para configurar las asignaciones de botones
   private void configureBindings() {
+
+    // ================= DRIVER CONTROLS =================
+
+
     // Asigna el botón "circle" del controlador PS4 para ejecutar el comando
     // AutoDriveForward
     // Este comando hace que el robot avance a una velocidad de 0.5 por 2 segundos
@@ -61,6 +65,9 @@ public class RobotContainer {
     // comandos AutoSequence
     // AutoSequence es una serie de acciones predefinidas
     commandPS4Controller.square().onTrue(new AutoSequence(driveTrain));
+
+
+     // ================= OPERATOR CONTROLS =================
   }
 
   // Método para obtener el comando autónomo

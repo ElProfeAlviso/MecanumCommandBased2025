@@ -46,16 +46,16 @@ public class AutoDriveForward extends Command {
   @Override
   public void execute() {
   if (cronos.get() <= time) { // Si el tiempo transcurrido es menor o igual al tiempo deseado
-    driveTrain.mecanumDrive_Cartesian(speed, 0, 0); // Mantén el movimiento hacia adelante
+    driveTrain.setMecanumDrive_Cartesian(speed, 0, 0); // Mantén el movimiento hacia adelante
   } else {
-    driveTrain.mecanumDrive_Cartesian(0, 0, 0); // Detén el robot
+    driveTrain.setMecanumDrive_Cartesian(0, 0, 0); // Detén el robot
   }
   }
 
   // Este método se llama una vez cuando el comando termina o es interrumpido.
   @Override
   public void end(boolean interrupted) {
-  driveTrain.mecanumDrive_Cartesian(0, 0, 0); // Asegúrate de detener el robot
+  driveTrain.setMecanumDrive_Cartesian(0, 0, 0); // Asegúrate de detener el robot
   cronos.stop(); // Detén el temporizador
   }
 

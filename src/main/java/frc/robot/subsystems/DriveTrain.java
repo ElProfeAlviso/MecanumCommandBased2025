@@ -66,7 +66,7 @@ public class DriveTrain extends SubsystemBase {
     rearRightMotor.configure(rearRightMotorConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters);
 
     // Configuración del objeto MecanumDrive
-    mecanumDrive.setDeadband(0.02); // Zona muerta del joystick para evitar movimientos no deseados
+    mecanumDrive.setDeadband(0.03); // Zona muerta del joystick para evitar movimientos no deseados
     mecanumDrive.setMaxOutput(1.0); // Salida máxima del sistema de conducción
     mecanumDrive.setSafetyEnabled(true); // Habilitar el sistema de seguridad para evitar errores
     mecanumDrive.setExpiration(0.1); // Tiempo de expiración del sistema de seguridad
@@ -79,7 +79,7 @@ public class DriveTrain extends SubsystemBase {
    * @param ySpeed Velocidad en el eje Y (izquierda/derecha)
    * @param zRotation Rotación en el eje Z (girar)
    */
-  public void mecanumDrive_Cartesian(double xSpeed, double ySpeed, double zRotation) {
+  public void setMecanumDrive_Cartesian(double xSpeed, double ySpeed, double zRotation) {
     mecanumDrive.driveCartesian(xSpeed, ySpeed, zRotation);
   }
 

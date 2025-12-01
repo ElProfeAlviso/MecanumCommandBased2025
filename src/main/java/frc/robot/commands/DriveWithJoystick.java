@@ -41,14 +41,14 @@ public class DriveWithJoystick extends Command {
     double zRotation = controller.getRightX(); // Rotación del robot
 
     // Llama al método del subsistema para mover el robot usando las entradas del controlador.
-    driveTrain.mecanumDrive_Cartesian(xSpeed, ySpeed, zRotation);
+    driveTrain.setMecanumDrive_Cartesian(xSpeed, ySpeed, zRotation);
   }
 
   // Método llamado cuando el comando termina o es interrumpido.
   @Override
   public void end(boolean interrupted) {
     // Detiene el robot cuando el comando finaliza.
-    driveTrain.mecanumDrive_Cartesian(0, 0, 0);
+    driveTrain.setMecanumDrive_Cartesian(0, 0, 0);
   }
 
   // Método que indica si el comando ha terminado.

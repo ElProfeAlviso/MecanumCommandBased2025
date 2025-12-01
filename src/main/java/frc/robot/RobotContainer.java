@@ -59,7 +59,7 @@ public class RobotContainer {
     // Asigna el botón "circle" del controlador PS4 para ejecutar el comando
     // AutoDriveForward
     // Este comando hace que el robot avance a una velocidad de 0.5 por 2 segundos
-    commandPS4Controller.circle().onTrue(new AutoDriveForward(driveTrain, 0.5, 2));
+    commandPS4Controller.circle().onTrue(new AutoDriveForward(driveTrain, 0.5, 1));
 
     // Asigna el botón "square" del controlador PS4 para ejecutar la secuencia de
     // comandos AutoSequence

@@ -6,11 +6,11 @@ package frc.robot;
 //Comandos de clase generales.
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 //Joysticks standard y por comandos.
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj.PS4Controller;
-
+import frc.robot.subsystems.Climber;
 //Clases de Subsistemas
 import frc.robot.subsystems.DriveTrain;
 
@@ -26,6 +26,7 @@ public class RobotContainer {
   // Los subsistemas representan las partes físicas del robot (motores, sensores,
   // etc.)
   private final DriveTrain driveTrain = new DriveTrain();
+  private final Climber climber = new Climber();
 
   // Controlador PS4 para manejar el robot
   private final PS4Controller ps4Controller = new PS4Controller(Constants.Joysticks.PS4_CONTROLLER_PORT);
@@ -65,6 +66,11 @@ public class RobotContainer {
     // comandos AutoSequence
     // AutoSequence es una serie de acciones predefinidas
     commandPS4Controller.square().onTrue(new AutoSequence(driveTrain));
+
+    commandPS4Controller.triangle().onTrue(new InstantCommand(() -> climber.setClimberSetPoint(20), climber));
+    commandPS4Controller.cross().onTrue(new InstantCommand(() -> climber.setClimberSetPoint(0), climber));
+
+    commandPS4Controller.R1().onTrue(new InstantCommand(() -> climber.enableClimberPID(true), climber));
 
 
      // ================= OPERATOR CONTROLS =================

@@ -5,10 +5,17 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.robot.subsystems.DriveTrain;
 
 public class InstantCommands {
 
+  //Ejemplo de un comando instantaneo en linea que detiene el drivetrain.
+  //public static final Command stopDrive = new InstantCommand(() -> RobotContainer.driveTrain.stopDrive(), RobotContainer.driveTrain);
+
+    //Los comandos runnning no son instantaneos, pero pueden usarse para crear comandos simples en linea.
+   // public static final Command ledsControl = new RunCommand(null, null);
+    
   /**
    * Creates an emergency stop command for the robot's drivetrain.
    * This command will stop the drivetrain motors immediately when executed.

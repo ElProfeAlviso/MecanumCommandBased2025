@@ -18,10 +18,12 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 // Importación de la clase SparkMaxConfig para configurar los motores Spark MAX
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.studica.frc.AHRS;
 
+import edu.wpi.first.wpilibj.Encoder;
 // Importación de la clase MecanumDrive para manejar la lógica de conducción Mecanum
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
-
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 // Importación de la clase SubsystemBase para definir subsistemas en el framework Command-Based
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -29,6 +31,12 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class DriveTrain extends SubsystemBase {
+
+  // Creacion de objeto de giroscopio y AHRS Navx
+  private final AHRS navx = new AHRS(AHRS.NavXComType.kMXP_SPI); // Giroscopio Navx conectado por SPI
+
+  // Creacion de objeto Encoder Relativo incremental
+  private final Encoder encoder4x = new Encoder(0, 1, true, Encoder.EncodingType.k4X); // Encoder incremental en puertos digitales 0 y 1
 
   // Declaración de los motores del drivetrain Mecanum
   // Cada motor está asociado a un puerto específico definido en la clase
@@ -55,6 +63,15 @@ public class DriveTrain extends SubsystemBase {
    * conducción.
    */
   public DriveTrain() {
+    // Reinicia el giroscopio Navx para establecer el ángulo inicial en 0
+    navx.reset();
+
+    // Configuracion de encoders
+    encoder4x.setSamplesToAverage(10); // Promedia 10 muestras para suavizar la lectura
+    encoder4x.setDistancePerPulse(1.0 / 360 * (Math.PI * 6)); // Configura la distancia por pulso en pulgadas
+    encoder4x.setMinRate(10); // Configura la tasa mínima de pulsos
+    encoder4x.reset(); // Resetea el encoder
+
 
     // Configuración de los motores (inversión, modo de inactividad, límite de
     // corriente)
@@ -100,12 +117,46 @@ public class DriveTrain extends SubsystemBase {
     mecanumDrive.stopMotor();
   }
 
+  public double getGyroAngle() {
+    return navx.getAngle();
+  }
+
+  public double getEncoderDistance() {
+    return Math.round(encoder4x.getDistance() * 100) / 100d;
+  }
+
+  public void getEncoderSpeed() {
+    encoder4x.getRate();
+  }
+
+  public void resetEncoder() {
+    encoder4x.reset();
+  }
+
+  public void resetGyro() {
+    navx.reset();
+  }
+
+  
+
+
+
   /**
    * Método que se llama periódicamente en el ciclo del scheduler.
    * Aquí se puede agregar lógica que se ejecute constantemente durante la operación.
    */
   @Override
   public void periodic() {
+
+    // Distancia en pulgadas con 2 decimales
+    SmartDashboard.putNumber("Encoder en Distancia", getEncoderDistance());
+    SmartDashboard.putData("Encoder Relativo", encoder4x);
+
+    SmartDashboard.putData("Navx Angle", navx);
+    SmartDashboard.putNumber("Navx Yaw", navx.getYaw());
+
+
+
     // Este método se llama una vez por ciclo del scheduler
     // Aquí puedes agregar lógica que se ejecute constantemente
   }

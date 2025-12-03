@@ -6,18 +6,22 @@ package frc.robot;
 
 // Importa la clase TimedRobot, que proporciona una estructura básica para un robot basado en tiempo.
 import edu.wpi.first.wpilibj.TimedRobot;
-
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 // Importa la interfaz Command, que representa una acción o conjunto de acciones que el robot puede realizar.
 import edu.wpi.first.wpilibj2.command.Command;
 
 // Importa el CommandScheduler, que se encarga de gestionar y ejecutar los comandos.
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.subsystems.Climber;
+
+
+//Visión WebCam Microsoft HD 3000
+import edu.wpi.first.cameraserver.CameraServer; // Librería para iniciar la captura de video desde cámaras USB
+import edu.wpi.first.cscore.UsbCamera; // Clase para manejar cámaras USB
 
 // La clase Robot es el punto de entrada principal para el programa del robot.
 // Extiende TimedRobot, que proporciona métodos que se llaman durante diferentes estados del robot.
 public class Robot extends TimedRobot {
-  private Climber m_climber;
+  
 
   // Este comando se usará para ejecutar durante el período autónomo.
   private Command m_autonomousCommand;
@@ -27,9 +31,15 @@ public class Robot extends TimedRobot {
 
   // El constructor inicializa el RobotContainer.
   public Robot() {
+    SmartDashboard.putData("Command Scheduler", CommandScheduler.getInstance());
     m_robotContainer = new RobotContainer();
-    m_climber = m_robotContainer.getClimberSubsystem();
-    m_climber.enableClimberPID(false); // Deshabilita el PID del Climber al iniciar el robot
+   
+
+     // Inicia la captura automática de la primera cámara USB encontrada
+    UsbCamera camera = CameraServer.startAutomaticCapture();
+    camera.setResolution(320, 240); // Configura la resolución de la cámara
+    camera.setFPS(15); // Configura los cuadros por segundo
+    
   }
 
   // Este método se llama periódicamente, sin importar el estado del robot.
@@ -79,7 +89,7 @@ public class Robot extends TimedRobot {
       m_autonomousCommand.cancel();
     }
 
-    m_climber.enableClimberPID(true); // Deshabilita el PID del Climber al iniciar teleop
+   
   }
 
   // Se llama periódicamente durante el estado teleop.

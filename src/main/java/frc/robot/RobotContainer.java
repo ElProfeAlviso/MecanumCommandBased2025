@@ -18,7 +18,8 @@ import frc.robot.subsystems.Shooter;
 //Clases de Comandos definidos por el usuario
 import frc.robot.commands.AutoDriveForward;
 import frc.robot.commands.AutoSequence;
-import frc.robot.commands.ClimberPIDJoystick;
+import frc.robot.commands.ClimberPID;
+import frc.robot.commands.ClimberWithJoystick;
 import frc.robot.commands.DriveWithJoystick;
 import frc.robot.commands.ShooterPID;
 
@@ -41,8 +42,8 @@ public class RobotContainer {
   // Los comandos son acciones que el robot puede realizar, como moverse o
   // ejecutar una secuencia
   private final DriveWithJoystick driveWithJoystickCmd = new DriveWithJoystick(driveTrain, ps4Controller);
-  private final ClimberPIDJoystick climberPIDCmd = new ClimberPIDJoystick(climber, ps4Controller);
-
+  private final ClimberWithJoystick climberWithJoystickCmd = new ClimberWithJoystick(climber, 0);
+  
   public Climber getClimberSubsystem() {
     return climber;
   }
@@ -56,7 +57,8 @@ public class RobotContainer {
     // Este comando se ejecutará continuamente mientras no haya otro comando activo
     // para este subsistema
     driveTrain.setDefaultCommand(driveWithJoystickCmd);
-    climber.setDefaultCommand(climberPIDCmd);
+    climber.setDefaultCommand(climberWithJoystickCmd);
+   
   }
 
   // Método para configurar las asignaciones de botones
@@ -70,10 +72,17 @@ public class RobotContainer {
     
     // comandos AutoSequence
     // AutoSequence es una serie de acciones predefinidas
-    commandPS4Controller.square().onTrue(new AutoSequence(driveTrain));
+    commandPS4Controller.square().onTrue(new AutoSequence(driveTrain, shooter, climber));
    
     commandPS4Controller.R1().onTrue(new ShooterPID(shooter, 0));
-    commandPS4Controller.L1().onFalse(new ShooterPID(shooter, 3000));
+    commandPS4Controller.L1().onTrue(new ShooterPID(shooter, 3000));
+
+    commandPS4Controller.R2().whileTrue(new ClimberWithJoystick(climber, 0.5));
+    commandPS4Controller.L2().whileTrue(new ClimberWithJoystick(climber, -0.5));
+
+    commandPS4Controller.cross().onTrue(new ClimberPID(climber, 0));
+    commandPS4Controller.circle().onTrue(new ClimberPID(climber, 25));
+    commandPS4Controller.triangle().onTrue(new ClimberPID(climber, 50));
 
 
 
@@ -87,6 +96,6 @@ public class RobotContainer {
     // configurado
     Commands.print("Autonomous Selected");
 
-    return new AutoSequence(driveTrain);
+    return new AutoSequence(driveTrain, shooter, climber );
   }
 }

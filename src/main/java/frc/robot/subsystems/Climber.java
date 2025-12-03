@@ -18,7 +18,7 @@ import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.commands.ClimberPIDJoystick;
+
 
 public class Climber extends SubsystemBase {
 
@@ -29,7 +29,8 @@ public class Climber extends SubsystemBase {
   private final SparkClosedLoopController climberPid = climberMotor.getClosedLoopController(); // Controlador PID del climber
 
   private double climberSetPoint; // Variable para almacenar el setpoint del climber.
-  boolean ClimberEnablePID = false; // Variable para habilitar o deshabilitar el control PID del climber
+  private boolean ClimberEnablePID = false; // Variable para habilitar o deshabilitar el control PID del climber
+  private double climberManualSpeed = 0;
 
   // Creacion de objeto de Sendable personalizado del Climber PID Sparkmax para envio a elastic.
   // Esto crea un objeto en el dashboard que permite modificar los valores del PID en tiempo real.
@@ -87,24 +88,28 @@ public class Climber extends SubsystemBase {
   }
 
   // Método para establecer el setpoint del Climber
-  public void setClimberPIDPosition(double setPoint) {
-    
-    this.climberSetPoint = setPoint;
-    climberPid.setReference(climberSetPoint, ControlType.kPosition);
+  public void setClimberPIDPosition(double setPoint) {    
+    this.climberSetPoint = setPoint;    
   }
   // Método para habilitar o deshabilitar el control PID del Climber
-  public void enableClimberPID(boolean enable) {
+  public void setEnableClimberPID(boolean enable) {
     this.ClimberEnablePID = enable;
   }
 
-   public void setClimberStop() {
+ 
+   public void ClimberStopMotor() {
     climberMotor.stopMotor(); // Método para detener el Climber estableciendo el setpoint a 0
+  }
+
+  public boolean isAtPosition (double position, double tolerance) {
+    double currentPosition = climberMotor.getEncoder().getPosition();
+    return Math.abs(currentPosition - position) <= tolerance;
   }
 
    
 
   public void setClimberManual(double output) {
-    climberMotor.set(output);
+    this.climberManualSpeed = output;
   }
 
   
@@ -112,7 +117,14 @@ public class Climber extends SubsystemBase {
   @Override
   public void periodic() {
 
+    if (ClimberEnablePID){
+      climberPid.setReference(climberSetPoint, ControlType.kPosition);
+    } else {
+      climberMotor.set(climberManualSpeed);     
+    }
 
+   
+    SmartDashboard.putBoolean("LLego a posicion", isAtPosition(climberSetPoint, 2));
     // Envía los controles PID del Climber al SmartDashboard para ajustes en tiempo real
     SmartDashboard.putData("PID Climber", pidClimberSendable);
 

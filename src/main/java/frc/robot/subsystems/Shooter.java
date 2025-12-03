@@ -26,6 +26,9 @@ public class Shooter extends SubsystemBase {
   private final SparkClosedLoopController shooterPid = shooterMotor.getClosedLoopController(); // Controlador PID del shooter
 
   private double shooterSetPoint = 0;//Variable para almacenar el setpoint del shooter
+  private boolean shooterStatus = false;
+
+ 
 
   //Creacion de objeto de Sendable personalizado  del Shooter PID Sparkmax para envio a elastic.
   //Esto crea un objeto en el dashboard que permite modificar los valores del PID en tiempo real.
@@ -76,11 +79,30 @@ public class Shooter extends SubsystemBase {
 
   public void setShooterSetPoint(double setPoint) {
     shooterSetPoint = setPoint; // Método para establecer el setpoint del shooter
+    shooterStatus = true;
   }
 
   public void stopShooter() {
-    shooterSetPoint = 0; // Método para detener el shooter estableciendo el setpoint a 0
+    shooterMotor.stopMotor(); // Método para detener el shooter estableciendo el setpoint a 0
+    shooterStatus = false;
   }
+
+  public boolean  isStopped(){
+    
+    return shooterStatus;
+    // Método para verificar si el shooter está detenido
+  }
+
+  public void getSpeed(){
+    shooterMotor.getEncoder().getVelocity(); // Método para obtener la velocidad actual del shooter
+  }
+
+  public boolean isAtSpeed (double speed, double tolerance) {
+    double currentSpeed = shooterMotor.getEncoder().getVelocity();
+    return Math.abs(currentSpeed - speed) <= tolerance;
+  }
+
+ 
 
   
 
@@ -94,6 +116,6 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putNumber("Shooter Velocity", shooterMotor.getEncoder().getVelocity());
     SmartDashboard.putNumber("Shooter Output", shooterMotor.getAppliedOutput());
 
-      shooterPid.setReference(shooterSetPoint, ControlType.kVelocity); // Control PID para el shooter
+    shooterPid.setReference(shooterSetPoint, ControlType.kVelocity); // Control PID para el shooter
   }
 }

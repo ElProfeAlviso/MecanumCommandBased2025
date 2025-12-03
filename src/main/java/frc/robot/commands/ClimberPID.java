@@ -4,49 +4,53 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj.PS4Controller;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Shooter;
+import frc.robot.subsystems.Climber;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class ShooterPID extends Command {
+public class ClimberPID extends Command {
 
-  private final Shooter shooter; // Subsystem that controls the shooter
-  private final double setPoint; // Desired setpoint for the shooter
-  private static final double kTolerance = 200;
+  private final Climber climber; // Subsystem that controls the climber
+  private double setPoint; // Desired setpoint for the climber
+  private double tolerance = 2;
+  
 
-  /** Creates a new ShooterPID. */
-  public ShooterPID(Shooter shooterSubsystem, double shooterSetPoint) {
-    this.shooter = shooterSubsystem;
-    this.setPoint = shooterSetPoint;
-
-    addRequirements(shooter);
+  /** Creates a new ClimberPID. */
+  public ClimberPID(Climber climberSubsystem, double setPoint){
+    this.climber = climberSubsystem;
+    this.setPoint = setPoint;
+    
+    addRequirements(climber);
     // Use addRequirements() here to declare subsystem dependencies.
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    shooter.setShooterSetPoint(setPoint);
+
+    climber.setEnableClimberPID(true); // Enable PID control for the climber
+    climber.setClimberPIDPosition(setPoint); // Set the desired setpoint for the climber
+
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     
-
-  }
+    
+  } 
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    shooter.stopShooter();
+    climber.ClimberStopMotor();
+    // Stop the climber motor
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    
-
-    return shooter.isAtSpeed(setPoint, kTolerance);
+    return climber.isAtPosition(setPoint, tolerance); // Check if the climber has reached the desired position;
   }
 }

@@ -24,10 +24,10 @@ public class AutoSequence extends SequentialCommandGroup {
    * Crea una nueva secuencia automática (AutoSequence).
    * @param mecanumDriveTrain El subsistema de tren de manejo que se usará en los comandos.
    */
-  public AutoSequence(DriveTrain mecanumDriveTrain, Shooter shooterSubsystem, Climber Climber) {
+  public AutoSequence(DriveTrain mecanumDriveTrain, Shooter shooterSubsystem, Climber ClimberSubsystem) {
     this.driveTrain = mecanumDriveTrain;
     this.shooter = shooterSubsystem;
-    this.climber = Climber;
+    this.climber = ClimberSubsystem;
 
     // Aquí se agregan los comandos que se ejecutarán en secuencia.
     // Cada comando se ejecuta uno tras otro en el orden en que se agregan.
@@ -38,14 +38,14 @@ public class AutoSequence extends SequentialCommandGroup {
     // Comando para detenerse (velocidad 0) por 1 segundo.
     addCommands(new AutoDriveForward(driveTrain, 0, 0.5));
 
-    addCommands(new ClimberPID(Climber, 30)); // Subir el climber a la posición 1000
+    addCommands(new ClimberPID(climber, 30)); // Subir el climber a la posición 1000
 
-    addCommands(new ShooterPID(shooterSubsystem, 2500));//Encender shooter a 3000 RPM
+    addCommands(new ShooterPID(shooter, 2500));//Encender shooter a 3000 RPM
 
     addCommands(new WaitCommand(1));
 
-    addCommands(new ShooterPID(shooterSubsystem, 0));
-    addCommands(new ClimberPID(Climber, 0)); 
+    addCommands(new ShooterPID(shooter, 0));
+    addCommands(new ClimberPID(climber, 0)); 
 
     addCommands(new WaitCommand(0.5));
 

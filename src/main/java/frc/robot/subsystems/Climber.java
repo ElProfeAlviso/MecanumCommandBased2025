@@ -14,9 +14,11 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkBase.ControlType;
 
-
+import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.commands.ClimberPIDJoystick;
 
 public class Climber extends SubsystemBase {
 
@@ -28,6 +30,36 @@ public class Climber extends SubsystemBase {
 
   private double climberSetPoint; // Variable para almacenar el setpoint del climber.
   boolean ClimberEnablePID = false; // Variable para habilitar o deshabilitar el control PID del climber
+
+  // Creacion de objeto de Sendable personalizado del Climber PID Sparkmax para envio a elastic.
+  // Esto crea un objeto en el dashboard que permite modificar los valores del PID en tiempo real.
+  Sendable pidClimberSendable = new Sendable() {
+    @Override
+    public void initSendable(SendableBuilder climberBuilder) {
+      climberBuilder.setSmartDashboardType("Climber PIDController");
+
+      climberBuilder.addDoubleProperty("P", () -> climberMotor.configAccessor.closedLoop.getP(),
+      x -> {climberMotorConfig.closedLoop.p(x);
+            climberMotor.configure(climberMotorConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters);
+      });
+
+      climberBuilder.addDoubleProperty("I", () -> climberMotor.configAccessor.closedLoop.getI(),
+      x -> {climberMotorConfig.closedLoop.i(x);
+            climberMotor.configure(climberMotorConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters);
+      });
+
+      climberBuilder.addDoubleProperty("D", () -> climberMotor.configAccessor.closedLoop.getD(),
+      x -> {climberMotorConfig.closedLoop.d(x);
+            climberMotor.configure(climberMotorConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters);
+      });
+
+      climberBuilder.addDoubleProperty("FF", () -> climberMotor.configAccessor.closedLoop.getFF(),
+      x -> {climberMotorConfig.closedLoop.velocityFF(x);
+            climberMotor.configure(climberMotorConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters);
+      });
+    }
+  };
+  
 
   /** Creates a new Elevator. */
   public Climber() {
@@ -55,17 +87,35 @@ public class Climber extends SubsystemBase {
   }
 
   // Método para establecer el setpoint del Climber
-  public void setClimberSetPoint(double setPoint) {
+  public void setClimberPIDPosition(double setPoint) {
+    
     this.climberSetPoint = setPoint;
+    climberPid.setReference(climberSetPoint, ControlType.kPosition);
   }
   // Método para habilitar o deshabilitar el control PID del Climber
   public void enableClimberPID(boolean enable) {
     this.ClimberEnablePID = enable;
   }
+
+   public void setClimberStop() {
+    climberMotor.stopMotor(); // Método para detener el Climber estableciendo el setpoint a 0
+  }
+
+   
+
+  public void setClimberManual(double output) {
+    climberMotor.set(output);
+  }
+
   
 
   @Override
   public void periodic() {
+
+
+    // Envía los controles PID del Climber al SmartDashboard para ajustes en tiempo real
+    SmartDashboard.putData("PID Climber", pidClimberSendable);
+
     // Actualiza el SmartDashboard con la posición del encoder del Climber
     SmartDashboard.putNumber("Climber Position Encoder", climberMotor.getEncoder().getPosition());
 
@@ -74,11 +124,10 @@ public class Climber extends SubsystemBase {
     SmartDashboard.putNumber("Climber Encoder", climberMotor.getEncoder().getPosition());
     SmartDashboard.putNumber("Climber Output", climberMotor.getAppliedOutput());
 
-    if (ClimberEnablePID) {
-      climberPid.setReference(climberSetPoint, ControlType.kPosition);
-    }
+    
+
+    
 
 
-    // This method will be called once per scheduler run
   }
 }

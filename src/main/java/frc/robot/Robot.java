@@ -12,10 +12,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 // Importa el CommandScheduler, que se encarga de gestionar y ejecutar los comandos.
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.Climber;
 
 // La clase Robot es el punto de entrada principal para el programa del robot.
 // Extiende TimedRobot, que proporciona métodos que se llaman durante diferentes estados del robot.
 public class Robot extends TimedRobot {
+  private Climber m_climber;
+
   // Este comando se usará para ejecutar durante el período autónomo.
   private Command m_autonomousCommand;
   
@@ -25,6 +28,8 @@ public class Robot extends TimedRobot {
   // El constructor inicializa el RobotContainer.
   public Robot() {
     m_robotContainer = new RobotContainer();
+    m_climber = m_robotContainer.getClimberSubsystem();
+    m_climber.enableClimberPID(false); // Deshabilita el PID del Climber al iniciar el robot
   }
 
   // Este método se llama periódicamente, sin importar el estado del robot.
@@ -73,6 +78,8 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
+
+    m_climber.enableClimberPID(true); // Deshabilita el PID del Climber al iniciar teleop
   }
 
   // Se llama periódicamente durante el estado teleop.

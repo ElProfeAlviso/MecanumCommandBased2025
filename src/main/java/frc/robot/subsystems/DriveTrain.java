@@ -54,8 +54,7 @@ public class DriveTrain extends SubsystemBase {
 
   // Instancia de MecanumDrive para controlar el drivetrain Mecanum
   // Este objeto se encarga de manejar la lógica de movimiento de los motores
-  private final MecanumDrive mecanumDrive = new MecanumDrive(frontLeftMotor, rearLeftMotor, frontRightMotor,
-      rearRightMotor);
+  private final MecanumDrive mecanumDrive = new MecanumDrive(frontLeftMotor, rearLeftMotor, frontRightMotor,rearRightMotor);
 
   /**
    * Constructor de la clase DriveTrain.
@@ -68,7 +67,7 @@ public class DriveTrain extends SubsystemBase {
 
     // Configuracion de encoders
     encoder4x.setSamplesToAverage(10); // Promedia 10 muestras para suavizar la lectura
-    encoder4x.setDistancePerPulse(1.0 / 360 * (Math.PI * 6)); // Configura la distancia por pulso en pulgadas
+    encoder4x.setDistancePerPulse((1.0 / 360 * (Math.PI * 6))*0.0254); // Configura la distancia por pulso en metros.
     encoder4x.setMinRate(10); // Configura la tasa mínima de pulsos
     encoder4x.reset(); // Resetea el encoder
 
@@ -81,14 +80,10 @@ public class DriveTrain extends SubsystemBase {
     rearRightMotorConfig.inverted(false).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
 
     // Aplicar las configuraciones a cada motor
-    frontLeftMotor.configure(frontLeftMotorConfig, SparkBase.ResetMode.kResetSafeParameters,
-        SparkBase.PersistMode.kPersistParameters);
-    rearLeftMotor.configure(rearLeftMotorConfig, SparkBase.ResetMode.kResetSafeParameters,
-        SparkBase.PersistMode.kPersistParameters);
-    frontRightMotor.configure(frontRightMotorConfig, SparkBase.ResetMode.kResetSafeParameters,
-        SparkBase.PersistMode.kPersistParameters);
-    rearRightMotor.configure(rearRightMotorConfig, SparkBase.ResetMode.kResetSafeParameters,
-        SparkBase.PersistMode.kPersistParameters);
+    frontLeftMotor.configure(frontLeftMotorConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters);
+    rearLeftMotor.configure(rearLeftMotorConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters);
+    frontRightMotor.configure(frontRightMotorConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters);
+    rearRightMotor.configure(rearRightMotorConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters);
 
     // Configuración del objeto MecanumDrive
     mecanumDrive.setDeadband(0.03); // Zona muerta del joystick para evitar movimientos no deseados
@@ -122,7 +117,7 @@ public class DriveTrain extends SubsystemBase {
   }
 
   public double getEncoderDistance() {
-    return Math.round(encoder4x.getDistance() * 100) / 100d;
+    return Math.round(encoder4x.getDistance() * 100) / 100d;//Redondea a 2 decimales
   }
 
   public void getEncoderSpeed() {

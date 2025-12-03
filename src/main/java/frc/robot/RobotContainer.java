@@ -7,7 +7,7 @@ package frc.robot;
 //Comandos de clase generales.
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
+
 //Joysticks standard y por comandos.
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
 import edu.wpi.first.wpilibj.PS4Controller;
@@ -16,7 +16,7 @@ import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.DriveTrain;
 import frc.robot.subsystems.Shooter;
 //Clases de Comandos definidos por el usuario
-import frc.robot.commands.AutoDriveForward;
+
 import frc.robot.commands.AutoSequence;
 import frc.robot.commands.ClimberPID;
 import frc.robot.commands.ClimberWithJoystick;

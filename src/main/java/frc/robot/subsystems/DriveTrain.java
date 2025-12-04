@@ -17,6 +17,8 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 
 // Importación de la clase AHRS para manejar el giroscopio Navx
 import com.studica.frc.AHRS;
+
+import edu.wpi.first.math.geometry.Rotation2d;
 // Importación de la clase Encoder para manejar encoders relativos incrementales
 import edu.wpi.first.wpilibj.Encoder;
 
@@ -61,12 +63,17 @@ public class DriveTrain extends SubsystemBase {
   // Este objeto se encarga de manejar la lógica de movimiento de los motores
   private final MecanumDrive mecanumDrive = new MecanumDrive(frontLeftMotor, rearLeftMotor, frontRightMotor,rearRightMotor);
 
+  private boolean fieldOriented = true; // Habilitar o deshabilitar el control Field Oriented Drive.
+
   /**
    * Constructor de la clase DriveTrain.
    * Aquí se inicializan las configuraciones de los motores y del sistema de
    * conducción.
    */
   public DriveTrain() {
+    SmartDashboard.putBoolean("FOD", fieldOriented); // Publica el estado inicial de FOD
+
+
     // Reinicia el giroscopio Navx para establecer el ángulo inicial en 0
     navx.reset();
 
@@ -97,6 +104,10 @@ public class DriveTrain extends SubsystemBase {
 
   }
 
+  public boolean isFieldOriented() {
+    return fieldOriented;
+  }
+
   /**
    * Método para controlar el drivetrain usando coordenadas cartesianas.
    * 
@@ -105,7 +116,12 @@ public class DriveTrain extends SubsystemBase {
    * @param zRotation Rotación en el eje Z (girar)
    */
   public void MecanumDrive_Cartesian(double xSpeed, double ySpeed, double zRotation) {
-    mecanumDrive.driveCartesian(xSpeed, ySpeed, zRotation);
+    if (fieldOriented){
+          Rotation2d navXAngle = Rotation2d.fromDegrees(navx.getAngle());
+          mecanumDrive.driveCartesian(xSpeed, ySpeed, zRotation, navXAngle);
+    } else{
+          mecanumDrive.driveCartesian(xSpeed, ySpeed, zRotation);
+    }
   }
 
   /**
@@ -169,6 +185,9 @@ public class DriveTrain extends SubsystemBase {
    */
   @Override
   public void periodic() {
+
+     // Lee el valor desde el dashboard en cada ciclo
+     fieldOriented = SmartDashboard.getBoolean("FOD", fieldOriented);
 
 
     // Distancia en pulgadas con 2 decimales

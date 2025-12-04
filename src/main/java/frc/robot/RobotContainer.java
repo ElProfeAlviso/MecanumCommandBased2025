@@ -7,6 +7,7 @@ package frc.robot;
 //Comandos de clase generales.
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 //Joysticks standard y por comandos.
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
@@ -16,15 +17,17 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.subsystems.Climber;
 //Clases de Subsistemas
 import frc.robot.subsystems.DriveTrain;
+import frc.robot.subsystems.LedsSystem;
 import frc.robot.subsystems.Sensores;
 import frc.robot.subsystems.Shooter;
 //Clases de Comandos definidos por el usuario
-
+import frc.robot.Constants.LedsSystemColors;
 import frc.robot.commands.AutoSequence;
 import frc.robot.commands.ClimberHoldPosition;
 import frc.robot.commands.ClimberPID;
 import frc.robot.commands.ClimberWithJoystick;
 import frc.robot.commands.DriveWithJoystick;
+import frc.robot.commands.LedsControl;
 import frc.robot.commands.ShooterPID;
 import frc.robot.commands.ShooterStop;
 
@@ -37,6 +40,7 @@ public class RobotContainer {
   private final Climber climber = new Climber();
   private final Shooter shooter = new Shooter();
   public final Sensores sensores = new Sensores();
+  public final LedsSystem ledsSystem = new LedsSystem();
   
 
 
@@ -44,6 +48,9 @@ public class RobotContainer {
   public final Command kDefaultAuto = new WaitCommand(0); // Opción por defecto para autónomo
   private final Command kCustomAuto = new AutoSequence(driveTrain, shooter, climber ); // Opción personalizada para autónomo
   public static final SendableChooser<Command> AutoChooser = new SendableChooser<>(); // Menú selector de autónomo
+
+
+  
 
 
   
@@ -118,6 +125,9 @@ public class RobotContainer {
     commandPS4Controller.cross().onTrue(new ClimberPID(climber, 0));
     commandPS4Controller.circle().onTrue(new ClimberPID(climber, 25));
     commandPS4Controller.triangle().onTrue(new ClimberPID(climber, 50));
+
+    commandPS4Controller.options().onTrue(new InstantCommand(()-> driveTrain.resetGyro(), driveTrain));
+  
 
 
 

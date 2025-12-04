@@ -137,7 +137,7 @@ public class Climber extends SubsystemBase {
     SmartDashboard.putNumber("Climber Set Point", climberSetPoint);
     SmartDashboard.putNumber("Climber Encoder", climberMotor.getEncoder().getPosition());
     SmartDashboard.putNumber("Climber Output", climberMotor.getAppliedOutput());
-    SmartDashboard.putBoolean("LLego a posicion", isAtPosition(climberSetPoint, 200));
+    SmartDashboard.putBoolean("LLego a posicion", isAtPosition(climberSetPoint, 2));
     SmartDashboard.putBoolean("Climber PID Enabled", climberEnablePID);
     SmartDashboard.putNumber("Climber Manual Speed", climberManualSpeed);
     

@@ -9,6 +9,9 @@ package frc.robot;
  * Estas constantes se usan en todo el proyecto para evitar valores "hardcoded"
  * y facilitar el mantenimiento del código.
  */
+
+
+
 public class Constants {
 
     // Aquí puedes agregar otras constantes globales si es necesario
@@ -47,4 +50,14 @@ public class Constants {
         public static final double AUTO_DRIVE_SPEED = 0.5; // Velocidad para conducir en modo autónomo
         public static final double AUTO_DRIVE_DURATION = 2.0; // Duración en segundos para conducir en modo autónomo
     }
+
+    public enum LedsSystemColors {
+        BLUE,
+        RED,
+        GREEN,
+        RAINBOW,
+        OFF
+    }
+
+    
 }

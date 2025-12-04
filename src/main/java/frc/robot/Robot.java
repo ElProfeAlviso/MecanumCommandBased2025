@@ -40,6 +40,9 @@ public class Robot extends TimedRobot {
 
 
   public void robotInit() {
+
+    m_robotContainer.ledsSystem.setColor(Constants.LedsSystemColors.OFF);
+
     Elastic.sendNotification(m_robotContainer.sensores.autoSelectedNotification);
     // Inicialización adicional si es necesario.
   }
@@ -63,11 +66,17 @@ public class Robot extends TimedRobot {
 
   // Se llama una vez cuando el robot entra en el estado deshabilitado.
   @Override
-  public void disabledInit() {}
+  public void disabledInit() {
+    m_robotContainer.ledsSystem.setColor(Constants.LedsSystemColors.RED);  
+
+  }
 
   // Se llama periódicamente mientras el robot está deshabilitado.
   @Override
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+
+    
+  }
 
   // Se llama una vez cuando el robot sale del estado deshabilitado.
   @Override
@@ -76,6 +85,8 @@ public class Robot extends TimedRobot {
   // Se llama una vez cuando el robot entra en el estado autónomo.
   @Override
   public void autonomousInit() {
+
+    m_robotContainer.ledsSystem.setColor(Constants.LedsSystemColors.BLUE);
     // Obtiene el comando autónomo desde el RobotContainer.
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
@@ -102,6 +113,10 @@ public class Robot extends TimedRobot {
   // Se llama una vez cuando el robot entra en el estado teleoperado (teleop).
   @Override
   public void teleopInit() {
+
+    m_robotContainer.ledsSystem.setColor(Constants.LedsSystemColors.GREEN);
+
+
     // Cancela el comando autónomo si aún se está ejecutando.
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();

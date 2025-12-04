@@ -21,8 +21,7 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrajectoryConfig;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.AddressableLED;
-import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
 import edu.wpi.first.wpilibj.AnalogTrigger;
@@ -44,7 +43,6 @@ import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotContainer;
 import frc.robot.util.Elastic;
-import frc.robot.util.TejuinoBoard;
 
 public class Sensores extends SubsystemBase {
 
@@ -66,13 +64,6 @@ public class Sensores extends SubsystemBase {
   private final I2C.Port i2cPort = I2C.Port.kOnboard; // Puerto I2C para el sensor de color
   private final ColorSensorV3 m_colorSensor = new ColorSensorV3(i2cPort); // Sensor de color Rev
 
-  // Creacion de objeto Leds Direccionables
-  private AddressableLED led; // Objeto para controlar LEDs direccionables
-  private AddressableLEDBuffer ledBuffer; // Buffer para almacenar datos de LEDs
-  private int rainbowFirstPixelHue = 0; // Variable para efecto arcoiris en LEDs
-
-  // Creacion de objeto Leds Driver Tejuino Board
-  private final TejuinoBoard tejuino_board = new TejuinoBoard(); // Controlador de LEDs Tejuino Board
 
   // Creacion de objeto PDP
   private final PowerDistribution PowerDistribution = new PowerDistribution(1, ModuleType.kCTRE); // Panel de distribución de energía
@@ -157,21 +148,7 @@ public class Sensores extends SubsystemBase {
     counter.clearDownSource();// No se usa fuente de conteo negativo
     counter.setUpSourceEdge(true, false);//Conteo valido solo para flanco de subida.
 
-    // Configuracion de Leds Direccionables
-    led = new AddressableLED(6);// Crea objeto LED en puerto PWM 6
-    ledBuffer = new AddressableLEDBuffer(5);// Crea buffer de 5 LEDs
-    led.setLength(ledBuffer.getLength());// Asigna largo del buffer al objeto LED
-    led.setData(ledBuffer);// Asigna buffer al objeto LED
-    led.start();// Activa la señal para los LEDs
-    // Apagar todos los leds al inicio para evitar que queden encendidos con valores previos
-    for (int i = 0; i < ledBuffer.getLength(); i++) {
-      ledBuffer.setRGB(i, 0, 0, 0); // Establece el color de los LEDs en negro (apagado)
-    }
-    led.setData(ledBuffer); // Actualiza los LEDs con los valores del buffer
-
-    // Configuración inicial de la Tejuino Board
-    tejuino_board.init(0); // Inicializa la Tejuino Board en el canal 0
-
+    
     // Configuracion de Trayectorias
     // Genera una trayectoria con puntos intermedios y velocidades máximas
     Trajectory m_trajectory = TrajectoryGenerator.generateTrajectory(
@@ -214,14 +191,11 @@ public class Sensores extends SubsystemBase {
   @Override
   public void periodic() {
 
-    fod = SmartDashboard.getBoolean("FOD", true); // Lee el estado de FOD desde el dashboard
+    
        
 
       
 
-     // Cambia el color de los LEDs en los canales 0 y 1 de la Tejuino Board a azul
-     tejuino_board.all_leds_blue(0);
-     tejuino_board.all_leds_blue(1);
 
     
     
@@ -242,16 +216,12 @@ public class Sensores extends SubsystemBase {
     alert.set(fod); // Activa o desactiva la alerta según el estado de FOD
     alert2.set(DriverStation.isEStopped()); // Activa la alerta si el robot está en paro de emergencia
 
-    // Efecto arcoiris en los LEDs
-    for (int i = 0; i < ledBuffer.getLength(); i++) {
-      final int hue = (rainbowFirstPixelHue + (i * 180 / ledBuffer.getLength())) % 180; // Calcula el tono para cada LED
-      ledBuffer.setHSV(i, hue, 255, 128); // Establece el color del LED en el buffer
+    // Reset del contador con el limit switch
+    if (limitSwitch.get() == false) {
+      counter.reset(); // Resetea el contador si el limit switch está presionado
     }
-    rainbowFirstPixelHue += 3; // Incrementa el tono inicial para el efecto arcoiris
-    rainbowFirstPixelHue %= 180; // Asegura que el tono esté dentro del rango válido
 
-    led.setData(ledBuffer); // Actualiza los LEDs con los valores del buffer
-
+    
     // Filtro para suavizar lectura del acelerómetro del Navx
     
 
@@ -267,7 +237,6 @@ public class Sensores extends SubsystemBase {
     
     SmartDashboard.putNumber("Match Time", matchTime);
     SmartDashboard.putData("Field", m_field);
-    SmartDashboard.putBoolean("FOD", fod);
     SmartDashboard.putBoolean("Magnetic Sensor", magneticSensor.get());
     SmartDashboard.putNumber("Ultrasonico", Ultrasonic.get());
     SmartDashboard.putData("Rio Acelerometro", accelerometer);
@@ -287,6 +256,9 @@ public class Sensores extends SubsystemBase {
 
     SmartDashboard.putNumber("Proximity", proximity);
     SmartDashboard.putString("Color Sensor", m_colorSensor.getColor().toHexString());
+
+     // Lee el valor desde el dashboard en cada ciclo
+     fod = SmartDashboard.getBoolean("FOD", fod);
 
   
 

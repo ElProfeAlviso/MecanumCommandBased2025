@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 // Importa el CommandScheduler, que se encarga de gestionar y ejecutar los comandos.
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.util.Elastic; //Utilidades para envio de alertas a dashboard Elastic
 
 
 // La clase Robot es el punto de entrada principal para el programa del robot.
@@ -29,9 +30,18 @@ public class Robot extends TimedRobot {
   public Robot() {
     SmartDashboard.putData("Command Scheduler", CommandScheduler.getInstance());
     m_robotContainer = new RobotContainer();
+
+    
+
  
 
     
+  }
+
+
+  public void robotInit() {
+    Elastic.sendNotification(m_robotContainer.sensores.autoSelectedNotification);
+    // Inicialización adicional si es necesario.
   }
 
   // Este método se llama periódicamente, sin importar el estado del robot.
@@ -39,6 +49,16 @@ public class Robot extends TimedRobot {
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+
+    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+
+    if (m_autonomousCommand == m_robotContainer.kDefaultAuto) {
+      m_robotContainer.sensores.noAutoSelected.set(true);   
+      } else {
+      m_robotContainer.sensores.noAutoSelected.set(false);
+    }
+
+    
   }
 
   // Se llama una vez cuando el robot entra en el estado deshabilitado.
@@ -63,6 +83,12 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
+
+    
+    
+    
+      
+    
   }
 
   // Se llama periódicamente durante el estado autónomo.

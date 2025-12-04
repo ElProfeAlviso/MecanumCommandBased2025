@@ -36,6 +36,7 @@ import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.PS4Controller;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -80,9 +81,9 @@ public class Sensores extends SubsystemBase {
   private final Field2d m_field = new Field2d(); // Objeto para visualización del campo en 2D
 
   // Creacion de objeto Alertas Dashboard
-  Alert alert = new Alert("Modo FOD ACTIVADO", Alert.AlertType.kInfo); // Alerta informativa para FOD
-  Alert alert2 = new Alert("PARO DE EMERGENCIA ACTIVADO", Alert.AlertType.kError); // Alerta de error para paro de emergencia
-  Alert noAutoSelected = new Alert("No se selecciono modo autonomo", Alert.AlertType.kWarning); // Alerta de advertencia para autónomo no seleccionado
+  public Alert alert = new Alert("Modo FOD ACTIVADO", Alert.AlertType.kInfo); // Alerta informativa para FOD
+  public Alert alert2 = new Alert("PARO DE EMERGENCIA ACTIVADO", Alert.AlertType.kError); // Alerta de error para paro de emergencia
+  public  Alert noAutoSelected = new Alert("No se selecciono modo autonomo", Alert.AlertType.kWarning); // Alerta de advertencia para autónomo no seleccionado
 
   // Creacion de objeto de Servomotor REV
   private Servo intakeServo = new Servo(0); // Servo para el mecanismo de intake en puerto PWM 0
@@ -105,8 +106,8 @@ public class Sensores extends SubsystemBase {
   Elastic.Notification notification = new Elastic.Notification(Elastic.NotificationLevel.INFO, "Teleoperado iniciado",
       "El modo teleoperado inicio correctamente"); // Notificación para inicio de teleoperado
   
-  Elastic.Notification autoSelectedNotification = new Elastic.Notification(Elastic.NotificationLevel.INFO, "Autonomo seleccionado",
-      "El modo autonomo seleccionado es: " + RobotContainer.AutoChooser.getSelected()); // Notificación para autónomo seleccionado
+  public Elastic.Notification autoSelectedNotification = new Elastic.Notification(Elastic.NotificationLevel.INFO, "Autonomo seleccionado",
+      "SELECCIONA UN AUTONOMO"); // Notificación para autónomo seleccionado
 
   
 
@@ -114,7 +115,7 @@ public class Sensores extends SubsystemBase {
   DutyCycleEncoder absoluteEncoder = new DutyCycleEncoder(2, 360, 0); // Encoder absoluto en puerto digital 2
 
   // Variables globales para todo el robot
-  private boolean fod; // Habilitar o deshabilitar el control Field Oriented Drive.
+  private boolean fod = true; // Habilitar o deshabilitar el control Field Oriented Drive.
   boolean ClimberEnablePID = false; // Variable para habilitar o deshabilitar el control PID del climber
   private int dashboardCounter = 0; // Contador para controlar la frecuencia de actualizacion del dashboard
 
@@ -186,10 +187,18 @@ public class Sensores extends SubsystemBase {
     // Configuracion de Posicion inicial servo
     intakeServo.setAngle(90); // Establece el ángulo inicial del servo
 
+    SmartDashboard.putNumber("Servo Angle", 90); // Publica el ángulo inicial del servo
+    SmartDashboard.putBoolean("FOD", fod); // Publica el estado inicial de FOD
+
+    SmartDashboard.putData("PDP", PowerDistribution); // Publica el objeto del panel de distribución de energía
+
     // Inicia la captura automática de la primera cámara USB encontrada
     UsbCamera camera = CameraServer.startAutomaticCapture();
     camera.setResolution(320, 240); // Configura la resolución de la cámara
     camera.setFPS(15); // Configura los cuadros por segundo
+
+
+    
 
 
 
@@ -198,8 +207,14 @@ public class Sensores extends SubsystemBase {
 
   }
 
+  public void sendMecanumDrive(MecanumDrive mecanumDrive) {
+    SmartDashboard.putData("Chasis", mecanumDrive); // Publica el objeto del chasis mecanum
+  }
+
   @Override
   public void periodic() {
+
+    fod = SmartDashboard.getBoolean("FOD", true); // Lee el estado de FOD desde el dashboard
        
 
       
@@ -208,13 +223,7 @@ public class Sensores extends SubsystemBase {
      tejuino_board.all_leds_blue(0);
      tejuino_board.all_leds_blue(1);
 
-
-
-
-     // Inicializa valores en el SmartDashboard
-    SmartDashboard.putBoolean("FOD", fod); // Publica el estado inicial de FOD
-    SmartDashboard.putNumber("Servo Angle", 90); // Publica el ángulo inicial del servo
-    SmartDashboard.putData("PDP", PowerDistribution); // Publica el objeto del panel de distribución de energía
+    
     
     // Lectura de sensor de color
     Color detectedColor = m_colorSensor.getColor(); // Obtiene el color detectado por el sensor
@@ -279,11 +288,13 @@ public class Sensores extends SubsystemBase {
     SmartDashboard.putNumber("Proximity", proximity);
     SmartDashboard.putString("Color Sensor", m_colorSensor.getColor().toHexString());
 
-   
+  
+
+    }
 
 
     
     // This method will be called once per scheduler run
   }
 }
-}
+

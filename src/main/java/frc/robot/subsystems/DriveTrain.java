@@ -176,6 +176,7 @@ public class DriveTrain extends SubsystemBase {
     SmartDashboard.putData("Encoder Relativo", frontRightEncoder);
     SmartDashboard.putData("Navx Angle", navx);
     SmartDashboard.putNumber("Navx Yaw", navx.getYaw());
+    SmartDashboard.putData("Chasis",mecanumDrive);
 
     
 

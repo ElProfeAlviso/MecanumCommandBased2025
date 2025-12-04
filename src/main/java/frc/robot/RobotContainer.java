@@ -35,13 +35,13 @@ public class RobotContainer {
   // etc.)
   private final DriveTrain driveTrain = new DriveTrain();
   private final Climber climber = new Climber();
-  public final Shooter shooter = new Shooter();
-  private final Sensores sensores = new Sensores();
+  private final Shooter shooter = new Shooter();
+  public final Sensores sensores = new Sensores();
   
 
 
   // Creacion de objeto Menu selector de Autonomo
-  private final Command kDefaultAuto = new WaitCommand(0); // Opción por defecto para autónomo
+  public final Command kDefaultAuto = new WaitCommand(0); // Opción por defecto para autónomo
   private final Command kCustomAuto = new AutoSequence(driveTrain, shooter, climber ); // Opción personalizada para autónomo
   public static final SendableChooser<Command> AutoChooser = new SendableChooser<>(); // Menú selector de autónomo
 
@@ -67,6 +67,10 @@ public class RobotContainer {
     return climber;
   }
 
+  public  DriveTrain getDriveTrainSubsystem() {
+    return driveTrain;
+  }
+
   // Constructor de RobotContainer
   // Aquí se configuran los subsistemas, comandos y las asignaciones de botones
   public RobotContainer() {
@@ -87,6 +91,8 @@ public class RobotContainer {
     AutoChooser.setDefaultOption("Default Auto", kDefaultAuto ); // Establece la opción por defecto como "Default Auto"
     AutoChooser.addOption("Command Sequence", kCustomAuto ); // Agrega una opción personalizada "Line 3 Segundos Auto"
     SmartDashboard.putData("Auto choserr", AutoChooser); // Publica el menú selector en el SmartDashboard
+
+   
 
   }
 

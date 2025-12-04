@@ -14,10 +14,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 
-//Visión WebCam Microsoft HD 3000
-import edu.wpi.first.cameraserver.CameraServer; // Librería para iniciar la captura de video desde cámaras USB
-import edu.wpi.first.cscore.UsbCamera; // Clase para manejar cámaras USB
-
 // La clase Robot es el punto de entrada principal para el programa del robot.
 // Extiende TimedRobot, que proporciona métodos que se llaman durante diferentes estados del robot.
 public class Robot extends TimedRobot {
@@ -33,12 +29,8 @@ public class Robot extends TimedRobot {
   public Robot() {
     SmartDashboard.putData("Command Scheduler", CommandScheduler.getInstance());
     m_robotContainer = new RobotContainer();
-   
+ 
 
-     // Inicia la captura automática de la primera cámara USB encontrada
-    UsbCamera camera = CameraServer.startAutomaticCapture();
-    camera.setResolution(320, 240); // Configura la resolución de la cámara
-    camera.setFPS(15); // Configura los cuadros por segundo
     
   }
 

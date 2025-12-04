@@ -1,46 +1,51 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
 // Paquete donde se encuentra la clase DriveTrain
 package frc.robot.subsystems;
 
-// Importación de la clase SparkBase de la biblioteca REV Robotics
-import com.revrobotics.spark.SparkBase;
-
-// Importación de la enumeración MotorType para definir el tipo de motor (brushed o brushless)
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-
-// Importación de la clase SparkMax para controlar los motores Spark MAX
-import com.revrobotics.spark.SparkMax;
-
-// Importación de la configuración básica de SparkBase, incluyendo el modo de inactividad
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-
-// Importación de la clase SparkMaxConfig para configurar los motores Spark MAX
-import com.revrobotics.spark.config.SparkMaxConfig;
-import com.studica.frc.AHRS;
-
-import edu.wpi.first.wpilibj.Encoder;
-// Importación de la clase MecanumDrive para manejar la lógica de conducción Mecanum
-import edu.wpi.first.wpilibj.drive.MecanumDrive;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 // Importación de la clase SubsystemBase para definir subsistemas en el framework Command-Based
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+// Importación de la clase SparkBase de la biblioteca REV Robotics
+import com.revrobotics.spark.SparkBase;
+// Importación de la enumeración MotorType para definir el tipo de motor (brushed o brushless)
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+// Importación de la clase SparkMax para controlar los motores Spark MAX
+import com.revrobotics.spark.SparkMax;
+// Importación de la configuración básica de SparkBase, incluyendo el modo de inactividad
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+// Importación de la clase SparkMaxConfig para configurar los motores Spark MAX
+import com.revrobotics.spark.config.SparkMaxConfig;
+
+// Importación de la clase AHRS para manejar el giroscopio Navx
+import com.studica.frc.AHRS;
+// Importación de la clase Encoder para manejar encoders relativos incrementales
+import edu.wpi.first.wpilibj.Encoder;
+
+// Importación de la clase MecanumDrive para manejar la lógica de conducción Mecanum
+import edu.wpi.first.wpilibj.drive.MecanumDrive;
+// Importación de la clase SmartDashboard para mostrar datos en el tablero inteligente
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 // Importación de la clase Constants que contiene las constantes del robot
 import frc.robot.Constants;
+/**
+ * Clase DriveTrain que representa el subsistema del tren de manejo (drivetrain)
+ * del robot.
+ * Esta clase maneja la configuración y el control de los motores, encoders y
+ * giroscopio del drivetrain Mecanum.
+ */
 
 public class DriveTrain extends SubsystemBase {
 
-  // Creacion de objeto de giroscopio y AHRS Navx
-  private final AHRS navx = new AHRS(AHRS.NavXComType.kMXP_SPI); // Giroscopio Navx conectado por SPI
+   // Creacion de objeto de giroscopio y AHRS Navx
+   private final AHRS navx = new AHRS(AHRS.NavXComType.kMXP_SPI); // Giroscopio Navx conectado por SPI
+
+ 
 
   // Creacion de objeto Encoder Relativo incremental
-  private final Encoder encoder4x = new Encoder(0, 1, true, Encoder.EncodingType.k4X); // Encoder incremental en puertos digitales 0 y 1
+  private final Encoder frontRightEncoder = new Encoder(Constants.DriveTrain.FRONT_RIGHT_ENCODER_ID_A, Constants.DriveTrain.FRONT_RIGHT_ENCODER_ID_B, true, Encoder.EncodingType.k4X); // Encoder incremental en puertos digitales 0 y 1
 
   // Declaración de los motores del drivetrain Mecanum
-  // Cada motor está asociado a un puerto específico definido en la clase
-  // Constants
+  // Cada motor está asociado a un puerto específico definido en la clase Constants
   private final SparkMax frontLeftMotor = new SparkMax(Constants.DriveTrain.FRONT_LEFT_MOTOR_ID, MotorType.kBrushed);
   private final SparkMax rearLeftMotor = new SparkMax(Constants.DriveTrain.REAR_LEFT_MOTOR_ID, MotorType.kBrushed);
   private final SparkMax frontRightMotor = new SparkMax(Constants.DriveTrain.FRONT_RIGHT_MOTOR_ID, MotorType.kBrushed);
@@ -66,14 +71,13 @@ public class DriveTrain extends SubsystemBase {
     navx.reset();
 
     // Configuracion de encoders
-    encoder4x.setSamplesToAverage(10); // Promedia 10 muestras para suavizar la lectura
-    encoder4x.setDistancePerPulse((1.0 / 360 * (Math.PI * 6))*0.0254); // Configura la distancia por pulso en metros.
-    encoder4x.setMinRate(10); // Configura la tasa mínima de pulsos
-    encoder4x.reset(); // Resetea el encoder
+    frontRightEncoder.setSamplesToAverage(10); // Promedia 10 muestras para suavizar la lectura
+    frontRightEncoder.setDistancePerPulse((1.0 / 360 * (Math.PI * 6))*0.0254); // Configura la distancia por pulso en metros.
+    frontRightEncoder.setMinRate(10); // Configura la tasa mínima de pulsos
+    frontRightEncoder.reset(); // Resetea el encoder
 
 
-    // Configuración de los motores (inversión, modo de inactividad, límite de
-    // corriente)
+    // Configuración de los motores (inversión, modo de inactividad, límite de corriente)
     frontLeftMotorConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
     rearLeftMotorConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
     frontRightMotorConfig.inverted(false).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
@@ -112,21 +116,44 @@ public class DriveTrain extends SubsystemBase {
     mecanumDrive.stopMotor();
   }
 
+  /**
+   * Método para obtener el ángulo actual del giroscopio Navx.
+   * 
+   * @return Ángulo en grados
+   */
+
   public double getGyroAngle() {
     return navx.getAngle();
   }
+  /**
+   * Método para obtener la distancia recorrida por el encoder frontal derecho.
+   * 
+   * @return Distancia en metros
+   */
 
   public double getEncoderDistance() {
-    return Math.round(encoder4x.getDistance() * 100) / 100d;//Redondea a 2 decimales
+    return Math.round(frontRightEncoder.getDistance() * 100) / 100d;//Redondea a 2 decimales
   }
+  /**
+   * Método para obtener la velocidad actual del encoder frontal derecho.
+   * 
+   */
 
   public void getEncoderSpeed() {
-    encoder4x.getRate();
+    frontRightEncoder.getRate();
   }
+  /**
+   * Método para resetear el valor del encoder frontal derecho a cero.
+   * Esto es útil para recalibrar la distancia medida.
+   */
 
   public void resetEncoder() {
-    encoder4x.reset();
+    frontRightEncoder.reset();
   }
+  /**
+   * Método para resetear el giroscopio Navx a cero.
+   * Esto es útil para recalibrar la orientación del robot.
+   */
 
   public void resetGyro() {
     navx.reset();
@@ -138,21 +165,22 @@ public class DriveTrain extends SubsystemBase {
 
   /**
    * Método que se llama periódicamente en el ciclo del scheduler.
-   * Aquí se puede agregar lógica que se ejecute constantemente durante la operación.
+   * Envio de datos al SmartDashboard para monitoreo.
    */
   @Override
   public void periodic() {
 
+
     // Distancia en pulgadas con 2 decimales
     SmartDashboard.putNumber("Encoder en Distancia", getEncoderDistance());
-    SmartDashboard.putData("Encoder Relativo", encoder4x);
-
+    SmartDashboard.putData("Encoder Relativo", frontRightEncoder);
     SmartDashboard.putData("Navx Angle", navx);
     SmartDashboard.putNumber("Navx Yaw", navx.getYaw());
 
+    
 
 
-    // Este método se llama una vez por ciclo del scheduler
-    // Aquí puedes agregar lógica que se ejecute constantemente
+
+
   }
 }

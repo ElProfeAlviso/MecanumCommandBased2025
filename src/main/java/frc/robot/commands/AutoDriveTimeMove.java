@@ -12,7 +12,7 @@ import frc.robot.subsystems.DriveTrain;
  * durante un tiempo específico y a una velocidad dada. 
  * Command-Based Programming organiza el código en comandos y subsistemas para facilitar la reutilización y el mantenimiento.
  */
-public class AutoDriveForward extends Command {
+public class AutoDriveTimeMove extends Command {
 
   private final DriveTrain driveTrain; // Subsistema que controla el tren de manejo (DriveTrain)
   private double speed; // Velocidad a la que se moverá el robot
@@ -29,7 +29,7 @@ public class AutoDriveForward extends Command {
    * @param time              El tiempo durante el cual el robot se moverá hacia
    *                          adelante.
    */
-  public AutoDriveForward(DriveTrain mecanumDriveTrain, double speed, double time) {
+  public AutoDriveTimeMove(DriveTrain mecanumDriveTrain, double speed, double time) {
     this.driveTrain = mecanumDriveTrain;
     this.speed = speed;
     this.time = time;

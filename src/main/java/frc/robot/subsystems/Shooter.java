@@ -26,7 +26,7 @@ public class Shooter extends SubsystemBase {
   private final SparkClosedLoopController shooterPid = shooterMotor.getClosedLoopController(); // Controlador PID del shooter
 
   private double shooterSetPoint = 0;//Variable para almacenar el setpoint del shooter
-  private boolean shooterStatus = false;
+  private boolean shooterEnabled = false;
 
  
 
@@ -64,7 +64,7 @@ public class Shooter extends SubsystemBase {
   public Shooter() {
     // Configuracion de motor de Shooter
     // Configura el modo de inactividad, inversión, límite de corriente y sensor de retroalimentación
-    shooterMotorConfig.idleMode(IdleMode.kCoast); //Configura el modo Libre sin freno
+    shooterMotorConfig.idleMode(IdleMode.kBrake); //Configura el modo Libre sin freno
     shooterMotorConfig.inverted(true);//Invierte el giro del motor
     shooterMotorConfig.smartCurrentLimit(40);//Establece el límite de corriente
     shooterMotorConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder);// Usa el encoder interno como sensor de retroalimentación
@@ -77,19 +77,20 @@ public class Shooter extends SubsystemBase {
 
   }
 
-  public void setShooterSetPoint(double setPoint) {
+  public void setShooterPIDSpeed(double setPoint) {
     shooterSetPoint = setPoint; // Método para establecer el setpoint del shooter
-    shooterStatus = true;
+    shooterEnabled = true;
+    shooterPid.setReference(shooterSetPoint, ControlType.kVelocity); // Control PID para el shooter
   }
 
   public void stopShooter() {
     shooterMotor.stopMotor(); // Método para detener el shooter estableciendo el setpoint a 0
-    shooterStatus = false;
+    shooterEnabled = false;
   }
 
   public boolean  isStopped(){
     
-    return shooterStatus;
+    return shooterEnabled;
     // Método para verificar si el shooter está detenido
   }
 
@@ -100,6 +101,10 @@ public class Shooter extends SubsystemBase {
   public boolean isAtSpeed (double speed, double tolerance) {
     double currentSpeed = shooterMotor.getEncoder().getVelocity();
     return Math.abs(currentSpeed - speed) <= tolerance;
+  }
+
+  public boolean isPIDEnabled() {
+    return shooterEnabled;
   }
 
  
@@ -116,6 +121,6 @@ public class Shooter extends SubsystemBase {
     SmartDashboard.putNumber("Shooter Velocity", shooterMotor.getEncoder().getVelocity());
     SmartDashboard.putNumber("Shooter Output", shooterMotor.getAppliedOutput());
 
-    shooterPid.setReference(shooterSetPoint, ControlType.kVelocity); // Control PID para el shooter
+    
   }
 }

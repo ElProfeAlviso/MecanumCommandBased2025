@@ -28,14 +28,14 @@ public class ClimberWithJoystick extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    climber.setEnableClimberPID(false);
-    climber.setClimberManual(speed);
+    
+    climber.setClimberManualPosition(speed);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    climber.ClimberStopMotor();
+    climber.holdClimberPosition();
   }
 
   // Returns true when the command should end.

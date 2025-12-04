@@ -28,7 +28,6 @@ public class ClimberPID extends Command {
   @Override
   public void initialize() {
 
-    climber.setEnableClimberPID(true); // Enable PID control for the climber
     climber.setClimberPIDPosition(setPoint); // Set the desired setpoint for the climber
 
   }

@@ -21,6 +21,17 @@ public class Constants {
         public static final int REAR_LEFT_MOTOR_ID = 3; // Motor trasero izquierdo
         public static final int FRONT_RIGHT_MOTOR_ID = 4; // Motor delantero derecho
         public static final int REAR_RIGHT_MOTOR_ID = 2; // Motor trasero derecho
+
+        //Encoders de los motores del tren de manejo
+        public static final int FRONT_LEFT_ENCODER_ID_A = 0; // Encoder del lado izquierdo
+        public static final int FRONT_LEFT_ENCODER_ID_B = 0; // Encoder del lado izquierdo
+        public static final int REAR_LEFT_ENCODER_ID_A = 0; // Encoder del lado derecho
+        public static final int REAR_LEFT_ENCODER_ID_B = 0; // Encoder del lado derecho
+        public static final int FRONT_RIGHT_ENCODER_ID_A = 0; // Encoder del lado izquierdo
+        public static final int FRONT_RIGHT_ENCODER_ID_B = 1; // Encoder del lado izquierdo
+        public static final int REAR_RIGHT_ENCODER_ID_A = 0; // Encoder del lado derecho
+        public static final int REAR_RIGHT_ENCODER_ID_B = 0; // Encoder del lado derecho
+
     }
 
     public static final class Joysticks {

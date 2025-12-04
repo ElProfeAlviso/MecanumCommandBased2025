@@ -33,10 +33,10 @@ public class AutoSequence extends SequentialCommandGroup {
     // Cada comando se ejecuta uno tras otro en el orden en que se agregan.
 
     // Comando para avanzar hacia adelante a una velocidad de 0.5 por 2 segundos.
-    addCommands(new AutoDriveForward(driveTrain, 0.5, 1));
+    addCommands(new AutoDriveTimeMove(driveTrain, 0.5, 1));
 
     // Comando para detenerse (velocidad 0) por 1 segundo.
-    addCommands(new AutoDriveForward(driveTrain, 0, 0.5));
+    addCommands(new AutoDriveTimeMove(driveTrain, 0, 0.5));
 
     addCommands(new ClimberPID(climber, 30)); // Subir el climber a la posición 1000
 
@@ -50,7 +50,7 @@ public class AutoSequence extends SequentialCommandGroup {
     addCommands(new WaitCommand(0.5));
 
     // Comando para retroceder a una velocidad de -0.5 por 2 segundos.
-    addCommands(new AutoDriveForward(driveTrain, -0.5, 0.5));
+    addCommands(new AutoDriveTimeMove(driveTrain, -0.5, 0.5));
 
     
 

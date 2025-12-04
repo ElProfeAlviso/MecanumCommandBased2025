@@ -26,7 +26,7 @@ public class ShooterPID extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    shooter.setShooterSetPoint(setPoint);
+    shooter.setShooterPIDSpeed(setPoint);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -39,7 +39,8 @@ public class ShooterPID extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    shooter.stopShooter();
+    
+    
   }
 
   // Returns true when the command should end.

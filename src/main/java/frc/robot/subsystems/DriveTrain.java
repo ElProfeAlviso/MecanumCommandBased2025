@@ -18,7 +18,13 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 // Importación de la clase AHRS para manejar el giroscopio Navx
 import com.studica.frc.AHRS;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.Kinematics;
+import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
+import edu.wpi.first.math.kinematics.MecanumDriveOdometry;
+import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
 // Importación de la clase Encoder para manejar encoders relativos incrementales
 import edu.wpi.first.wpilibj.Encoder;
 
@@ -38,14 +44,6 @@ import frc.robot.Constants;
 
 public class DriveTrain extends SubsystemBase {
 
-   // Creacion de objeto de giroscopio y AHRS Navx
-   private final AHRS navx = new AHRS(AHRS.NavXComType.kMXP_SPI); // Giroscopio Navx conectado por SPI
-
- 
-
-  // Creacion de objeto Encoder Relativo incremental
-  private final Encoder frontRightEncoder = new Encoder(Constants.DriveTrain.FRONT_RIGHT_ENCODER_ID_A, Constants.DriveTrain.FRONT_RIGHT_ENCODER_ID_B, true, Encoder.EncodingType.k4X); // Encoder incremental en puertos digitales 0 y 1
-
   // Declaración de los motores del drivetrain Mecanum
   // Cada motor está asociado a un puerto específico definido en la clase Constants
   private final SparkMax frontLeftMotor = new SparkMax(Constants.DriveTrain.FRONT_LEFT_MOTOR_ID, MotorType.kBrushed);
@@ -59,9 +57,25 @@ public class DriveTrain extends SubsystemBase {
   private final SparkMaxConfig frontRightMotorConfig = new SparkMaxConfig();
   private final SparkMaxConfig rearRightMotorConfig = new SparkMaxConfig();
 
+   
+  private final Encoder frontLeftEncoder = new Encoder(Constants.DriveTrain.FRONT_LEFT_ENCODER_ID_A, Constants.DriveTrain.FRONT_LEFT_ENCODER_ID_B, true, Encoder.EncodingType.k4X); 
+
+  private final Encoder rearLeftEncoder = new Encoder(Constants.DriveTrain.REAR_LEFT_ENCODER_ID_A, Constants.DriveTrain.REAR_LEFT_ENCODER_ID_B, true, Encoder.EncodingType.k4X); 
+
+ private final Encoder frontRightEncoder = new Encoder(Constants.DriveTrain.FRONT_RIGHT_ENCODER_ID_A, Constants.DriveTrain.FRONT_RIGHT_ENCODER_ID_B, true, Encoder.EncodingType.k4X); // Encoder incremental en puertos digitales 0 y 1
+ private final Encoder rearRightEncoder = new Encoder(Constants.DriveTrain.REAR_RIGHT_ENCODER_ID_A, Constants.DriveTrain.REAR_RIGHT_ENCODER_ID_B, true, Encoder.EncodingType.k4X); // Encoder incremental en puertos digitales 0 y 1
+
+  
   // Instancia de MecanumDrive para controlar el drivetrain Mecanum
   // Este objeto se encarga de manejar la lógica de movimiento de los motores
-  private final MecanumDrive mecanumDrive = new MecanumDrive(frontLeftMotor, rearLeftMotor, frontRightMotor,rearRightMotor);
+  private final MecanumDrive mecanumDrive;
+  private final MecanumDriveKinematics mecanumkinematics;
+  private final MecanumDriveOdometry mecanumodometry; 
+
+  // Creacion de objeto de giroscopio y AHRS Navx
+  private final AHRS navx = new AHRS(AHRS.NavXComType.kMXP_SPI); // Giroscopio Navx conectado por SPI 
+    
+  
 
   private boolean fieldOriented = true; // Habilitar o deshabilitar el control Field Oriented Drive.
 
@@ -71,19 +85,7 @@ public class DriveTrain extends SubsystemBase {
    * conducción.
    */
   public DriveTrain() {
-    SmartDashboard.putBoolean("FOD", fieldOriented); // Publica el estado inicial de FOD
-
-
-    // Reinicia el giroscopio Navx para establecer el ángulo inicial en 0
-    navx.reset();
-
-    // Configuracion de encoders
-    frontRightEncoder.setSamplesToAverage(10); // Promedia 10 muestras para suavizar la lectura
-    frontRightEncoder.setDistancePerPulse((1.0 / 360 * (Math.PI * 6))*0.0254); // Configura la distancia por pulso en metros.
-    frontRightEncoder.setMinRate(10); // Configura la tasa mínima de pulsos
-    frontRightEncoder.reset(); // Resetea el encoder
-
-
+    
     // Configuración de los motores (inversión, modo de inactividad, límite de corriente)
     frontLeftMotorConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
     rearLeftMotorConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
@@ -96,6 +98,46 @@ public class DriveTrain extends SubsystemBase {
     frontRightMotor.configure(frontRightMotorConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters);
     rearRightMotor.configure(rearRightMotorConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters);
 
+    
+
+    // Reinicia el giroscopio Navx para establecer el ángulo inicial en 0
+    navx.reset();
+
+    frontLeftEncoder.setSamplesToAverage(10); // Promedia 10 muestras para suavizar la lectura
+    frontLeftEncoder.setDistancePerPulse((1.0 / 360 * (Math.PI * 6)) * 0.0254); // Configura la distancia por pulso en metros.
+    frontLeftEncoder.setMinRate(10); // Configura la tasa mínima de pulsos
+    frontLeftEncoder.reset(); // Resetea el encoder
+
+    rearLeftEncoder.setSamplesToAverage(10); // Promedia 10 muestras para suavizar la lectura
+    rearLeftEncoder.setDistancePerPulse((1.0 / 360 * (Math.PI * 6)) * 0.0254); // Configura la distancia por pulso en metros.
+    rearLeftEncoder.setMinRate(10); // Configura la tasa mínima de pulsos
+    rearLeftEncoder.reset(); // Resetea el encoder
+
+    // Configuracion de encoders
+    frontRightEncoder.setSamplesToAverage(10); // Promedia 10 muestras para suavizar la lectura
+    frontRightEncoder.setDistancePerPulse((1.0 / 360 * (Math.PI * 6)) * 0.0254); // Configura la distancia por pulso en metros.
+    frontRightEncoder.setMinRate(10); // Configura la tasa mínima de pulsos
+    frontRightEncoder.reset(); // Resetea el encoder
+
+    rearRightEncoder.setSamplesToAverage(10); // Promedia 10 muestras para suavizar la lectura
+    rearRightEncoder.setDistancePerPulse((1.0 / 360 * (Math.PI * 6)) * 0.0254); // Configura la distancia por pulso en metros.
+    rearRightEncoder.setMinRate(10); // Configura la tasa mínima de pulsos
+    rearRightEncoder.reset(); // Resetea el encoder
+
+    SmartDashboard.putBoolean("FOD", fieldOriented); // Publica el estado inicial de FOD
+
+    Translation2d frontLeftLocation = new Translation2d(0.381, 0.381); // Posición del motor delantero izquierdo (en metros)
+    Translation2d rearLeftLocation = new Translation2d(-0.381, 0.381); // Posición del motor trasero izquierdo (en metros)
+    Translation2d frontRightLocation = new Translation2d(0.381, -0.381); // Posición del motor delantero derecho (en metros)
+    Translation2d rearRightLocation = new Translation2d(-0.381, -0.381); // Posición del motor trasero derecho (en metros)
+
+    Rotation2d navxAngle = Rotation2d.fromDegrees(navx.getAngle());
+    Pose2d initialPose = new Pose2d(0, 0, navxAngle);
+
+    mecanumkinematics = new MecanumDriveKinematics(frontLeftLocation, rearLeftLocation, frontRightLocation, rearRightLocation);
+    mecanumDrive = new MecanumDrive(frontLeftMotor, rearLeftMotor, frontRightMotor,rearRightMotor);
+    mecanumodometry =new MecanumDriveOdometry(mecanumkinematics, navxAngle, new MecanumDriveWheelPositions(0,0,0,0),initialPose);
+
     // Configuración del objeto MecanumDrive
     mecanumDrive.setDeadband(0.03); // Zona muerta del joystick para evitar movimientos no deseados
     mecanumDrive.setMaxOutput(1.0); // Salida máxima del sistema de conducción
@@ -103,6 +145,7 @@ public class DriveTrain extends SubsystemBase {
     mecanumDrive.setExpiration(0.1); // Tiempo de expiración del sistema de seguridad
 
   }
+  
 
   public boolean isFieldOriented() {
     return fieldOriented;

@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Translation2d;
+
 /**
  * Esta clase Constants se utiliza para definir constantes globales del robot.
  * Estas constantes se usan en todo el proyecto para evitar valores "hardcoded"
@@ -34,6 +36,7 @@ public class Constants {
         public static final int FRONT_RIGHT_ENCODER_ID_B = 1; // Encoder del lado izquierdo
         public static final int REAR_RIGHT_ENCODER_ID_A = 0; // Encoder del lado derecho
         public static final int REAR_RIGHT_ENCODER_ID_B = 0; // Encoder del lado derecho
+        public static Translation2d FRONT_LEFT_POSITION;
 
     }
 

@@ -21,13 +21,13 @@ import frc.robot.subsystems.LedsSystem;
 import frc.robot.subsystems.Sensores;
 import frc.robot.subsystems.Shooter;
 //Clases de Comandos definidos por el usuario
-import frc.robot.Constants.LedsSystemColors;
+
 import frc.robot.commands.AutoSequence;
 import frc.robot.commands.ClimberHoldPosition;
 import frc.robot.commands.ClimberPID;
 import frc.robot.commands.ClimberWithJoystick;
 import frc.robot.commands.DriveWithJoystick;
-import frc.robot.commands.LedsControl;
+
 import frc.robot.commands.ShooterPID;
 import frc.robot.commands.ShooterStop;
 
@@ -108,12 +108,6 @@ public class RobotContainer {
 
     // ================= DRIVER CONTROLS =================
 
-    // Asigna el botón "circle" del controlador PS4 para ejecutar el comando
-    // AutoDriveForward
-    // Este comando hace que el robot avance a una velocidad de 0.5 por 2 segundos
-    
-    // comandos AutoSequence
-    // AutoSequence es una serie de acciones predefinidas
     commandPS4Controller.square().onTrue(new AutoSequence(driveTrain, shooter, climber));
    
     commandPS4Controller.R1().onTrue(new ShooterStop(shooter));

@@ -80,7 +80,13 @@ public class Shooter extends SubsystemBase {
   public void setShooterPIDSpeed(double setPoint) {
     shooterSetPoint = setPoint; // Método para establecer el setpoint del shooter
     shooterEnabled = true;
-    shooterPid.setReference(shooterSetPoint, ControlType.kVelocity); // Control PID para el shooter
+
+    // Ajusta el setpoint basado en el voltaje de la batería
+    double batteryVoltage = edu.wpi.first.wpilibj.RobotController.getBatteryVoltage();
+    double voltageCompensationFactor = 12.0 / batteryVoltage; // Factor de compensación basado en 12V nominales
+    double adjustedSetPoint = shooterSetPoint * voltageCompensationFactor;
+
+    shooterPid.setReference(adjustedSetPoint, ControlType.kVelocity); // Control PID para el shooter
   }
 
   public void stopShooter() {

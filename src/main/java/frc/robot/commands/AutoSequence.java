@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.Climber;
@@ -19,24 +20,24 @@ public class AutoSequence extends SequentialCommandGroup {
   private final DriveTrain driveTrain; // Subsistema de tren de manejo (DriveTrain)
   private final Shooter shooter; // Subsistema de lanzador (Shooter)
   private final Climber climber; // Subsistema de escalador (Climber)
+  private final Trajectory trajectory; // Trayectoria a seguir (Trajectory)
 
   /** 
    * Crea una nueva secuencia automática (AutoSequence).
    * @param mecanumDriveTrain El subsistema de tren de manejo que se usará en los comandos.
    */
-  public AutoSequence(DriveTrain mecanumDriveTrain, Shooter shooterSubsystem, Climber ClimberSubsystem) {
+  public AutoSequence(DriveTrain mecanumDriveTrain, Shooter shooterSubsystem, Climber ClimberSubsystem, Trajectory robotTrajectory) {
     this.driveTrain = mecanumDriveTrain;
     this.shooter = shooterSubsystem;
     this.climber = ClimberSubsystem;
+    this.trajectory = robotTrajectory;
 
     // Aquí se agregan los comandos que se ejecutarán en secuencia.
     // Cada comando se ejecuta uno tras otro en el orden en que se agregan.
 
-    // Comando para avanzar hacia adelante a una velocidad de 0.5 por 2 segundos.
-    addCommands(new AutoDriveTimeMove(driveTrain, 0.5, 1));
+    addCommands(new FollowTrajectoryCommand(mecanumDriveTrain, trajectory)); // Seguir la trayectoria definida
 
-    // Comando para detenerse (velocidad 0) por 1 segundo.
-    addCommands(new AutoDriveTimeMove(driveTrain, 0, 0.5));
+    addCommands(new WaitCommand(0.5));
 
     addCommands(new ClimberPID(climber, 30)); // Subir el climber a la posición 1000
 

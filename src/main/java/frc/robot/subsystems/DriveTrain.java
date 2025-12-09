@@ -16,6 +16,8 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.studica.frc.AHRS;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -31,6 +33,7 @@ import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -93,7 +96,29 @@ private final SimpleMotorFeedforward ff = new SimpleMotorFeedforward(0.2, 2.0, 0
   // Creacion de objeto Field 2D
   private final Field2d field = new Field2d(); // Objeto para visualización del campo en 2D
   // Publica la trayectoria en el SmartDashboard
-  private double kMaxWheelSpeedMps = 4; // Adjusted to a reasonable value for your robot
+  
+
+
+  // PID por rueda
+  private final PIDController pidFL = new PIDController(0.9, 0.0, 0.0001);
+  private final PIDController pidFR = new PIDController(0.9, 0.0, 0.0001);
+  private final PIDController pidRL = new PIDController(0.9, 0.0, 0.0001);
+  private final PIDController pidRR = new PIDController(0.9, 0.0, 0.0001);
+
+  // Feedforward por rueda (kS, kV, kA) — valores de ejemplo: debes tunear
+  private final SimpleMotorFeedforward ffFL = new SimpleMotorFeedforward(0.3, 2.2, 0.25);
+  private final SimpleMotorFeedforward ffFR = new SimpleMotorFeedforward(0.3, 2.2, 0.25);
+  private final SimpleMotorFeedforward ffRL = new SimpleMotorFeedforward(0.3, 2.2, 0.25);
+  private final SimpleMotorFeedforward ffRR = new SimpleMotorFeedforward(0.3, 2.2, 0.25);
+
+  PIDController anglePID = new PIDController(0.01, 0.0, 0.0001); // Ajusta los valores según sea necesario
+  
+
+  // límites y constantes
+  private final double kMaxWheelSpeedMps = 6.0; // ejemplo
+  private final double kMaxPercent = 1.0;
+
+  double moveAngle;
   
   
 
@@ -178,38 +203,166 @@ private final SimpleMotorFeedforward ff = new SimpleMotorFeedforward(0.2, 2.0, 0
     mecanumDrive.setSafetyEnabled(true); // Habilitar el sistema de seguridad para evitar errores
     mecanumDrive.setExpiration(0.1); // Tiempo de expiración del sistema de seguridad
 
-     Trajectory m_trajectory = TrajectoryGenerator.generateTrajectory(
-      new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
-      List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
-      new Pose2d(3, 0, Rotation2d.fromDegrees(0)),
-      new TrajectoryConfig(Units.feetToMeters(3.0), Units.feetToMeters(3.0)));
+    
 
 
     SmartDashboard.putData("Field", field);
     //field.getObject("Trajectory").setTrajectory(m_trajectory);
 
+    anglePID.enableContinuousInput(-180, 180); // Ángulo continuo entre -180 y 180 grados
+
   }
-
-
   /**
-   * Método para controlar el drivetrain usando coordenadas cartesianas.
-   * 
-   * @param xSpeed    Velocidad en el eje X (adelante/atrás)
-   * @param ySpeed    Velocidad en el eje Y (izquierda/derecha)
-   * @param zRotation Rotación en el eje Z (girar)
-   */
-  public void MecanumDrive_Cartesian(double xSpeed, double ySpeed, double zRotation) {
-    if (fieldOriented) {
-      Rotation2d navXAngle = Rotation2d.fromDegrees(navx.getAngle());
-      mecanumDrive.driveCartesian(xSpeed, ySpeed, zRotation, navXAngle);
-    } else {
-      mecanumDrive.driveCartesian(xSpeed, ySpeed, zRotation);
+    * Método para controlar el drivetrain usando coordenadas cartesianas con PID para cada rueda.
+    * Incluye un PID adicional para mantener el ángulo del robot.
+    * 
+    * @param xSpeed    Velocidad en el eje X (adelante/atrás)
+    * @param ySpeed    Velocidad en el eje Y (izquierda/derecha)
+    * @param zRotation Rotación en el eje Z (girar)
+    */
+    public void MecanumDrive_Cartesian(double xSpeed, double ySpeed, double zRotation) {
+      mecanumDrive.feed();
+
+      // Aplicar deadband para evitar movimientos no deseados
+      double deadband = 0.05; // Ajusta el valor según sea necesario
+      xSpeed = Math.abs(xSpeed) > deadband ? xSpeed : 0.0;
+      ySpeed = Math.abs(ySpeed) > deadband ? ySpeed : 0.0;
+      zRotation = Math.abs(zRotation) > deadband ? zRotation : 0.0;
+
+      // Si está habilitado el control orientado al campo, ajusta las velocidades
+      Rotation2d navXAngle = Rotation2d.fromDegrees(-navx.getAngle());
+      ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+        xSpeed * kMaxWheelSpeedMps, 
+        ySpeed * -kMaxWheelSpeedMps, 
+        zRotation * -kMaxWheelSpeedMps, 
+        navXAngle);
+      MecanumDriveWheelSpeeds wheelSpeeds = mecanumkinematics.toWheelSpeeds(chassisSpeeds);
+
+      // Limita las velocidades máximas
+      wheelSpeeds.desaturate(kMaxWheelSpeedMps);
+
+      // Objetivos de velocidad para cada rueda
+      double targetFL = wheelSpeeds.frontLeftMetersPerSecond;
+      double targetFR = wheelSpeeds.frontRightMetersPerSecond;
+      double targetRL = wheelSpeeds.rearLeftMetersPerSecond;
+      double targetRR = wheelSpeeds.rearRightMetersPerSecond;
+
+      // Mediciones actuales desde los encoders
+      double measFL = frontLeftEncoder.getRate();
+      double measFR = frontRightEncoder.getRate();
+      double measRL = rearLeftEncoder.getRate();
+      double measRR = rearRightEncoder.getRate();
+
+      // PID: salida en "unidad" (se interpretará como VOLTS cuando lo combine con FF)
+      double pidOutFL = pidFL.calculate(measFL, targetFL);
+      double pidOutFR = pidFR.calculate(measFR, targetFR);
+      double pidOutRL = pidRL.calculate(measRL, targetRL);
+      double pidOutRR = pidRR.calculate(measRR, targetRR);
+
+      // Feedforward (volts)
+      double ffVoltsFL = ffFL.calculate(targetFL);
+      double ffVoltsFR = ffFR.calculate(targetFR);
+      double ffVoltsRL = ffRL.calculate(targetRL);
+      double ffVoltsRR = ffRR.calculate(targetRR);
+
+      // Combinar: volts = ff + pidContributionScaled
+      double voltsFL = ffVoltsFL + pidOutFL;
+      double voltsFR = ffVoltsFR + pidOutFR;
+      double voltsRL = ffVoltsRL + pidOutRL;
+      double voltsRR = ffVoltsRR + pidOutRR;
+
+      // Normalizar a percent output usando tensión de batería actual
+      double battery = RobotController.getBatteryVoltage();
+      double percentFL = MathUtil.clamp(voltsFL / battery, -kMaxPercent, kMaxPercent);
+      double percentFR = MathUtil.clamp(voltsFR / battery, -kMaxPercent, kMaxPercent);
+      double percentRL = MathUtil.clamp(voltsRL / battery, -kMaxPercent, kMaxPercent);
+      double percentRR = MathUtil.clamp(voltsRR / battery, -kMaxPercent, kMaxPercent);
+
+      // Establecer la salida de los motores
+      frontLeftMotor.set(percentFL);
+      frontRightMotor.set(percentFR);
+      rearLeftMotor.set(percentRL);
+      rearRightMotor.set(percentRR);
     }
-  }
+
+
+  //Control con ChassisSpeeds Con PID
+  public void driveWithSpeeds(ChassisSpeeds chassisSpeeds) {
+     
+    mecanumDrive.feed();
+
+  // Si quieres field-oriented, transforma a chassisSpeeds de campo:
+  
+    Rotation2d heading = Rotation2d.fromDegrees(navx.getAngle());
+
+    chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+      chassisSpeeds.vxMetersPerSecond,
+      chassisSpeeds.vyMetersPerSecond,
+      chassisSpeeds.omegaRadiansPerSecond,
+      heading);
+  
+
+  MecanumDriveWheelSpeeds wheelSpeeds = mecanumkinematics.toWheelSpeeds(chassisSpeeds);
+
+  wheelSpeeds.desaturate(kMaxWheelSpeedMps);
+
+  double targetFL = wheelSpeeds.frontLeftMetersPerSecond;
+  double targetFR = wheelSpeeds.frontRightMetersPerSecond;
+  double targetRL = wheelSpeeds.rearLeftMetersPerSecond;
+  double targetRR = wheelSpeeds.rearRightMetersPerSecond;
+
+  // mediciones actuales (m/s) desde encoders
+  double measFL = frontLeftEncoder.getRate();
+  double measFR = frontRightEncoder.getRate();
+  double measRL = rearLeftEncoder.getRate();
+  double measRR = rearRightEncoder.getRate();
+
+  // PID: salida en "unidad" (se interpretará como VOLTS cuando lo combine con FF)
+  double pidOutFL = pidFL.calculate(measFL, targetFL);
+  double pidOutFR = pidFR.calculate(measFR, targetFR);
+  double pidOutRL = pidRL.calculate(measRL, targetRL);
+  double pidOutRR = pidRR.calculate(measRR, targetRR);
+
+  // Feedforward (volts) — si quieres incluir aceleración, puedes estimarla (a = (v - vprev)/dt)
+  double ffVoltsFL = ffFL.calculate(targetFL);
+  double ffVoltsFR = ffFR.calculate(targetFR);
+  double ffVoltsRL = ffRL.calculate(targetRL);
+  double ffVoltsRR = ffRR.calculate(targetRR);
+
+   // Combinar: volts = ff + pidContributionScaled
+  // Debes escalar pidOut para que tenga unidades de voltios: => trial/tuning.
+  // Una forma práctica: interpretar pidOut como 'volts' directamente (ajusta kP en consecuencia).
+  double voltsFL = ffVoltsFL + pidOutFL;
+  double voltsFR = ffVoltsFR + pidOutFR;
+  double voltsRL = ffVoltsRL + pidOutRL;
+  double voltsRR = ffVoltsRR + pidOutRR;
+
+  // Normalizar a percent output usando tensión de batería actual
+  double battery = RobotController.getBatteryVoltage();
+  double percentFL = MathUtil.clamp(voltsFL / battery, -kMaxPercent, kMaxPercent);
+  double percentFR = MathUtil.clamp(voltsFR / battery, -kMaxPercent, kMaxPercent);
+  double percentRL = MathUtil.clamp(voltsRL / battery, -kMaxPercent, kMaxPercent);
+  double percentRR = MathUtil.clamp(voltsRR / battery, -kMaxPercent, kMaxPercent);
+
+  double frontLeftOutput = percentFL;
+  double frontRightOutput = percentFR;
+  double rearLeftOutput = percentRL;
+  double rearRightOutput = percentRR;
+
+  frontLeftMotor.set(frontLeftOutput);
+  frontRightMotor.set(frontRightOutput);
+  rearLeftMotor.set(rearLeftOutput);
+  rearRightMotor.set(rearRightOutput);
+
+  
+}
 
 
   // Conduce usando kinematics -> wheel speeds
+/* 
+  //Control con ChassisSpeeds sin PID
   public void driveWithSpeeds(ChassisSpeeds chassisSpeeds) {
+     
       mecanumDrive.feed();
 
     // Si quieres field-oriented, transforma a chassisSpeeds de campo:
@@ -238,11 +391,11 @@ private final SimpleMotorFeedforward ff = new SimpleMotorFeedforward(0.2, 2.0, 0
     rearRightMotor.set(rearRightOutput);
 
     
-  }
+  }*/
 
 
 
-/* 
+/* //Control de Chasis con MecanumDrive
   public void driveWithSpeeds(ChassisSpeeds speeds){
     double xSpeed = Math.max(-1, Math.min(1, speeds.vxMetersPerSecond));
     double ySpeed = Math.max(-1, Math.min(1, speeds.vyMetersPerSecond));
@@ -324,6 +477,16 @@ public boolean isFieldOriented() {
     navx.reset();
   }
 
+  // Dentro de DriveTrain.java (añadir)
+public void publishTrajectory(String name, Trajectory trajectory) {
+  field.getObject(name).setTrajectory(trajectory);
+}
+
+public void clearTrajectory(String name) {
+  field.getObject(name).setTrajectory(new Trajectory());
+
+}
+
   /**
    * Método que se llama periódicamente en el ciclo del scheduler.
    * Envio de datos al SmartDashboard para monitoreo.
@@ -357,6 +520,13 @@ public MecanumDriveWheelSpeeds getWheelSpeeds() {
          mecanumodometry.resetPosition(getRotation2DAngle(), actualWheelPositions, pose);
 
           field.setRobotPose(pose);
+  }
+
+  public void stopMotors() {
+    frontLeftMotor.set(0);
+    frontRightMotor.set(0);
+    rearLeftMotor.set(0);
+    rearRightMotor.set(0);
   }
 
 

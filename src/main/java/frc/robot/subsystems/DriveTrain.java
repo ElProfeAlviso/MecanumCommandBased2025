@@ -8,11 +8,15 @@ import static edu.wpi.first.units.Units.Rotation;
 
 import java.util.List;
 import com.revrobotics.spark.SparkBase;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.studica.frc.AHRS;
+
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -42,6 +46,9 @@ import frc.robot.Constants;
 
 public class DriveTrain extends SubsystemBase {
 
+  // Feedforward para velocidad de rueda (ajusta tus constantes)
+private final SimpleMotorFeedforward ff = new SimpleMotorFeedforward(0.2, 2.0, 0.1); // kS, kV, kA (ejemplo)
+
   // Declaración de los motores del drivetrain Mecanum
   // Cada motor está asociado a un puerto específico definido en la clase
   // Constants
@@ -56,9 +63,12 @@ public class DriveTrain extends SubsystemBase {
   private final SparkMaxConfig frontRightMotorConfig = new SparkMaxConfig();
   private final SparkMaxConfig rearRightMotorConfig = new SparkMaxConfig();
 
+  
+
   private final Encoder frontLeftEncoder = new Encoder(Constants.DriveTrain.FRONT_LEFT_ENCODER_ID_A,
       Constants.DriveTrain.FRONT_LEFT_ENCODER_ID_B, false, Encoder.EncodingType.k4X);
 
+ 
   private final Encoder rearLeftEncoder = new Encoder(Constants.DriveTrain.REAR_LEFT_ENCODER_ID_A,
       Constants.DriveTrain.REAR_LEFT_ENCODER_ID_B, false, Encoder.EncodingType.k4X);
 
@@ -83,7 +93,7 @@ public class DriveTrain extends SubsystemBase {
   // Creacion de objeto Field 2D
   private final Field2d field = new Field2d(); // Objeto para visualización del campo en 2D
   // Publica la trayectoria en el SmartDashboard
-  private double kMaxWheelSpeedMps = 1.0; // Adjusted to a reasonable value for your robot
+  private double kMaxWheelSpeedMps = 4; // Adjusted to a reasonable value for your robot
   
   
 
@@ -100,6 +110,8 @@ public class DriveTrain extends SubsystemBase {
     rearLeftMotorConfig.inverted(true).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
     frontRightMotorConfig.inverted(false).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
     rearRightMotorConfig.inverted(false).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
+
+    
 
     // Aplicar las configuraciones a cada motor
     frontLeftMotor.configure(frontLeftMotorConfig, SparkBase.ResetMode.kResetSafeParameters,
@@ -149,12 +161,12 @@ public class DriveTrain extends SubsystemBase {
 
     MecanumDriveWheelPositions initialWheelPositions = new MecanumDriveWheelPositions(
         frontLeftEncoder.getDistance(),
-        rearLeftEncoder.getDistance(),
         frontRightEncoder.getDistance(),
+        rearLeftEncoder.getDistance(),
         rearRightEncoder.getDistance()
     );
 
-    mecanumkinematics = new MecanumDriveKinematics(frontLeftLocation, rearLeftLocation,frontRightLocation, rearRightLocation);
+    mecanumkinematics = new MecanumDriveKinematics(frontLeftLocation,frontRightLocation, rearLeftLocation, rearRightLocation);
 
     mecanumDrive = new MecanumDrive(frontLeftMotor, rearLeftMotor, frontRightMotor, rearRightMotor);
 
@@ -195,41 +207,42 @@ public class DriveTrain extends SubsystemBase {
     }
   }
 
-/*
+
   // Conduce usando kinematics -> wheel speeds
   public void driveWithSpeeds(ChassisSpeeds chassisSpeeds) {
+      mecanumDrive.feed();
+
     // Si quieres field-oriented, transforma a chassisSpeeds de campo:
-    if (fieldOriented) {
-      var heading = Rotation2d.fromDegrees(navx.getAngle());
-      chassisSpeeds = edu.wpi.first.math.kinematics.ChassisSpeeds.fromFieldRelativeSpeeds(
-          chassisSpeeds.vxMetersPerSecond,
-          chassisSpeeds.vyMetersPerSecond,
-          chassisSpeeds.omegaRadiansPerSecond,
-          heading
-      );
-    }
+    
+      Rotation2d heading = Rotation2d.fromDegrees(navx.getAngle());
+
+      chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+        chassisSpeeds.vxMetersPerSecond,
+        chassisSpeeds.vyMetersPerSecond,
+        chassisSpeeds.omegaRadiansPerSecond,
+        heading);
+    
 
     MecanumDriveWheelSpeeds wheelSpeeds = mecanumkinematics.toWheelSpeeds(chassisSpeeds);
 
-    // Desaturar para no exceder la velocidad máxima de rueda manteniendo proporciones
-   // wheelSpeeds.desaturate(kMaxWheelSpeedMps);
+    wheelSpeeds.desaturate(kMaxWheelSpeedMps);
 
-    // Convierte de m/s a salida de motor [-1, 1] (escala por tu velocidad máxima)
-    double fl = Math.max(-1.0, Math.min(1.0, wheelSpeeds.frontLeftMetersPerSecond / kMaxWheelSpeedMps));
-    double fr = Math.max(-1.0, Math.min(1.0, wheelSpeeds.frontRightMetersPerSecond / kMaxWheelSpeedMps));
-    double rl = Math.max(-1.0, Math.min(1.0, wheelSpeeds.rearLeftMetersPerSecond / kMaxWheelSpeedMps));
-    double rr = Math.max(-1.0, Math.min(1.0, wheelSpeeds.rearRightMetersPerSecond / kMaxWheelSpeedMps));
+    double frontLeftOutput = wheelSpeeds.frontLeftMetersPerSecond / kMaxWheelSpeedMps;
+    double frontRightOutput = wheelSpeeds.frontRightMetersPerSecond / kMaxWheelSpeedMps;
+    double rearLeftOutput = wheelSpeeds.rearLeftMetersPerSecond / kMaxWheelSpeedMps;
+    double rearRightOutput = wheelSpeeds.rearRightMetersPerSecond / kMaxWheelSpeedMps;
 
-    // Aplica a los motores (reemplaza set con tu API concreta)
-    frontLeftMotor.set(fl);
-    frontRightMotor.set(fr);
-    rearLeftMotor.set(rl);
-    rearRightMotor.set(rr);
-  } */
+    frontLeftMotor.set(frontLeftOutput);
+    frontRightMotor.set(frontRightOutput);
+    rearLeftMotor.set(rearLeftOutput);
+    rearRightMotor.set(rearRightOutput);
 
+    
+  }
 
 
 
+/* 
   public void driveWithSpeeds(ChassisSpeeds speeds){
     double xSpeed = Math.max(-1, Math.min(1, speeds.vxMetersPerSecond));
     double ySpeed = Math.max(-1, Math.min(1, speeds.vyMetersPerSecond));
@@ -243,7 +256,7 @@ public class DriveTrain extends SubsystemBase {
       }
 
 
-  }
+  } */
 
   /**
    * Método para detener todos los motores del drivetrain.
@@ -350,6 +363,8 @@ public MecanumDriveWheelSpeeds getWheelSpeeds() {
 
   @Override
   public void periodic() {
+
+   
 
     // Actualiza odometría con posiciones en metros
     MecanumDriveWheelPositions wheelPositions = new MecanumDriveWheelPositions(

@@ -48,7 +48,7 @@ public class RobotContainer {
 
   private Pose2d initialChasisPose = new Pose2d(0, 0, driveTrain.getRotation2DAngle());
 
-  private final Pose2d targetPose = new Pose2d(5, 5, Rotation2d.fromDegrees(0));
+  private final Pose2d targetPose = new Pose2d(0, 5, Rotation2d.fromDegrees(0));
 
   
 

@@ -29,8 +29,8 @@ public class DriveToPoseCommand extends Command {
     addRequirements(driveTrain);
 
     // Crear PID controllers (X, Y, Theta)
-    PIDController xController = new PIDController(1, 0.0, 0.0001);
-    PIDController yController = new PIDController(1, 0.0, 0.0001);
+    PIDController xController = new PIDController(3, 0.0, 0.0001);
+    PIDController yController = new PIDController(3, 0.0, 0.0001);
     ProfiledPIDController rotationController = new ProfiledPIDController(0.1, 0.0, 0.000,
         new edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints(
             Math.toRadians(180), Math.toRadians(360)));
@@ -38,8 +38,8 @@ public class DriveToPoseCommand extends Command {
     rotationController.enableContinuousInput(Math.toRadians(-Math.PI), Math.toRadians(Math.PI));
 
     // Configurar tolerancias internas si quieres (opcional)
-    xController.setTolerance(0.5);
-    yController.setTolerance(0.5);
+    xController.setTolerance(0.2);
+    yController.setTolerance(0.1);
     rotationController.setTolerance(Math.toRadians(5));
 
     holonomicDriveController = new HolonomicDriveController(xController, yController, rotationController);
@@ -61,7 +61,7 @@ public class DriveToPoseCommand extends Command {
     // objetivo: pose y rotación objetivo (usamos la rotación del target)
     Rotation2d desiredRotation = targetPose.getRotation();
 
-    double desiredSpeed = 0.5;
+    double desiredSpeed = 2;
 
     ChassisSpeeds targetChassisSpeeds = holonomicDriveController.calculate(currentPose, targetPose, desiredSpeed,
         desiredRotation);

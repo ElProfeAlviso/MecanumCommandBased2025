@@ -171,7 +171,7 @@ public class Sensores extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
+  public void periodic() {/* 
 
     
        
@@ -248,7 +248,7 @@ public class Sensores extends SubsystemBase {
 
 
     
-    // This method will be called once per scheduler run
+    // This method will be called once per scheduler run*/
   }
 }
 

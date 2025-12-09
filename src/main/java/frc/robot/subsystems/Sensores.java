@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems;
 
-import java.util.List;
-
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
 import com.ctre.phoenix6.hardware.CANrange;
@@ -14,13 +12,6 @@ import com.revrobotics.ColorSensorV3;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.cscore.UsbCamera;
 import edu.wpi.first.math.filter.LinearFilter;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.math.trajectory.TrajectoryGenerator;
-import edu.wpi.first.math.util.Units;
 
 import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.AnalogPotentiometer;
@@ -37,7 +28,6 @@ import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.Servo;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -68,8 +58,7 @@ public class Sensores extends SubsystemBase {
   // Creacion de objeto PDP
   private final PowerDistribution PowerDistribution = new PowerDistribution(1, ModuleType.kCTRE); // Panel de distribución de energía
 
-  // Creacion de objeto Field 2D
-  private final Field2d m_field = new Field2d(); // Objeto para visualización del campo en 2D
+  
 
   // Creacion de objeto Alertas Dashboard
   public Alert alert = new Alert("Modo FOD ACTIVADO", Alert.AlertType.kInfo); // Alerta informativa para FOD
@@ -80,9 +69,9 @@ public class Sensores extends SubsystemBase {
   private Servo intakeServo = new Servo(0); // Servo para el mecanismo de intake en puerto PWM 0
 
   // Creacion de objeto Sensores Digitales
-  DigitalInput magneticSensor = new DigitalInput(4); // Sensor magnético en puerto digital 4
-  DigitalInput limitSwitch = new DigitalInput(6); // Sensor de límite en puerto digital 6
-  DigitalInput InductiveSensor = new DigitalInput(7); // Sensor inductivo en puerto digital 7
+ // DigitalInput magneticSensor = new DigitalInput(4); // Sensor magnético en puerto digital 4
+  //DigitalInput limitSwitch = new DigitalInput(6); // Sensor de límite en puerto digital 6
+  //DigitalInput InductiveSensor = new DigitalInput(7); // Sensor inductivo en puerto digital 7
 
   // Creacion de objeto de sensores analogicos ultrasonicos
   AnalogPotentiometer Ultrasonic = new AnalogPotentiometer(0, 5000, 300); // Sensor ultrasónico en puerto analógico 0
@@ -103,7 +92,7 @@ public class Sensores extends SubsystemBase {
   
 
   // Creacion de objeto Encoder Absoluto Rev
-  DutyCycleEncoder absoluteEncoder = new DutyCycleEncoder(2, 360, 0); // Encoder absoluto en puerto digital 2
+  //DutyCycleEncoder absoluteEncoder = new DutyCycleEncoder(2, 360, 0); // Encoder absoluto en puerto digital 2
 
   // Variables globales para todo el robot
   private boolean fod = true; // Habilitar o deshabilitar el control Field Oriented Drive.
@@ -151,15 +140,8 @@ public class Sensores extends SubsystemBase {
     
     // Configuracion de Trayectorias
     // Genera una trayectoria con puntos intermedios y velocidades máximas
-    Trajectory m_trajectory = TrajectoryGenerator.generateTrajectory(
-      new Pose2d(0, 0, Rotation2d.fromDegrees(0)),
-      List.of(new Translation2d(1, 1), new Translation2d(2, -1)),
-      new Pose2d(3, 0, Rotation2d.fromDegrees(0)),
-      new TrajectoryConfig(Units.feetToMeters(3.0), Units.feetToMeters(3.0)));
-
-    // Publica la trayectoria en el SmartDashboard
-    SmartDashboard.putData(m_field);
-    m_field.getObject("traj").setTrajectory(m_trajectory);
+   
+    
 
     // Configuracion de Posicion inicial servo
     intakeServo.setAngle(90); // Establece el ángulo inicial del servo
@@ -217,9 +199,9 @@ public class Sensores extends SubsystemBase {
     alert2.set(DriverStation.isEStopped()); // Activa la alerta si el robot está en paro de emergencia
 
     // Reset del contador con el limit switch
-    if (limitSwitch.get() == false) {
-      counter.reset(); // Resetea el contador si el limit switch está presionado
-    }
+    //if (limitSwitch.get() == false) {
+    //  counter.reset(); // Resetea el contador si el limit switch está presionado
+   // }
 
     
     // Filtro para suavizar lectura del acelerómetro del Navx
@@ -236,14 +218,14 @@ public class Sensores extends SubsystemBase {
     SmartDashboard.putData("Controller", driverController);
     
     SmartDashboard.putNumber("Match Time", matchTime);
-    SmartDashboard.putData("Field", m_field);
-    SmartDashboard.putBoolean("Magnetic Sensor", magneticSensor.get());
+   
+   // SmartDashboard.putBoolean("Magnetic Sensor", magneticSensor.get());
     SmartDashboard.putNumber("Ultrasonico", Ultrasonic.get());
     SmartDashboard.putData("Rio Acelerometro", accelerometer);
    
-    SmartDashboard.putData("Encoder Absoluto", absoluteEncoder);
-    SmartDashboard.putBoolean("Limit switch", limitSwitch.get());
-    SmartDashboard.putBoolean("Sensor Inductivo", InductiveSensor.get());
+    //SmartDashboard.putData("Encoder Absoluto", absoluteEncoder);
+   // SmartDashboard.putBoolean("Limit switch", limitSwitch.get());
+    //SmartDashboard.putBoolean("Sensor Inductivo", InductiveSensor.get());
     SmartDashboard.putNumber("Temperatura PDP", PowerDistribution.getTemperature());
     SmartDashboard.putData("CANrange", canRange);
     SmartDashboard.putBoolean("ultrasonic trigger", ultrasonicTrigger.getTriggerState());

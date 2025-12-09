@@ -11,6 +11,8 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 //Joysticks standard y por comandos.
 import edu.wpi.first.wpilibj2.command.button.CommandPS4Controller;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.PS4Controller;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -26,6 +28,7 @@ import frc.robot.commands.AutoSequence;
 import frc.robot.commands.ClimberHoldPosition;
 import frc.robot.commands.ClimberPID;
 import frc.robot.commands.ClimberWithJoystick;
+import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.commands.DriveWithJoystick;
 
 import frc.robot.commands.ShooterPID;
@@ -33,6 +36,7 @@ import frc.robot.commands.ShooterStop;
 
 public class RobotContainer {
 
+  
   // Instancias de subsistemas
   // Los subsistemas representan las partes físicas del robot (motores, sensores,
   // etc.)
@@ -41,6 +45,11 @@ public class RobotContainer {
   private final Shooter shooter = new Shooter();
   public final Sensores sensores = new Sensores();
   public final LedsSystem ledsSystem = new LedsSystem();
+
+  private Pose2d initialChasisPose = new Pose2d(0, 0, driveTrain.getRotation2DAngle());
+
+  private final Pose2d targetPose = new Pose2d(5, 5, Rotation2d.fromDegrees(0));
+
   
 
 
@@ -108,7 +117,8 @@ public class RobotContainer {
 
     // ================= DRIVER CONTROLS =================
 
-    commandPS4Controller.square().onTrue(new AutoSequence(driveTrain, shooter, climber));
+    //commandPS4Controller.square().onTrue(new AutoSequence(driveTrain, shooter, climber));
+    commandPS4Controller.square().onTrue(new DriveToPoseCommand(driveTrain, targetPose));
    
     commandPS4Controller.R1().onTrue(new ShooterStop(shooter));
     commandPS4Controller.L1().onTrue(new ShooterPID(shooter, 3000));
@@ -121,6 +131,7 @@ public class RobotContainer {
     commandPS4Controller.triangle().onTrue(new ClimberPID(climber, 50));
 
     commandPS4Controller.options().onTrue(new InstantCommand(()-> driveTrain.resetGyro(), driveTrain));
+    commandPS4Controller.share().onTrue(new InstantCommand(()-> driveTrain.resetOdometry(initialChasisPose), driveTrain));
   
 
 

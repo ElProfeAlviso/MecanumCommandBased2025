@@ -29,13 +29,13 @@ public class Constants {
 
         //Encoders de los motores del tren de manejo
         public static final int FRONT_LEFT_ENCODER_ID_A = 0; // Encoder del lado izquierdo
-        public static final int FRONT_LEFT_ENCODER_ID_B = 0; // Encoder del lado izquierdo
-        public static final int REAR_LEFT_ENCODER_ID_A = 0; // Encoder del lado derecho
-        public static final int REAR_LEFT_ENCODER_ID_B = 0; // Encoder del lado derecho
-        public static final int FRONT_RIGHT_ENCODER_ID_A = 0; // Encoder del lado izquierdo
-        public static final int FRONT_RIGHT_ENCODER_ID_B = 1; // Encoder del lado izquierdo
-        public static final int REAR_RIGHT_ENCODER_ID_A = 0; // Encoder del lado derecho
-        public static final int REAR_RIGHT_ENCODER_ID_B = 0; // Encoder del lado derecho
+        public static final int FRONT_LEFT_ENCODER_ID_B = 1; // Encoder del lado izquierdo
+        public static final int REAR_LEFT_ENCODER_ID_A = 2; // Encoder del lado derecho
+        public static final int REAR_LEFT_ENCODER_ID_B = 3; // Encoder del lado derecho
+        public static final int FRONT_RIGHT_ENCODER_ID_A = 4; // Encoder del lado izquierdo
+        public static final int FRONT_RIGHT_ENCODER_ID_B = 5; // Encoder del lado izquierdo
+        public static final int REAR_RIGHT_ENCODER_ID_A = 6; // Encoder del lado derecho
+        public static final int REAR_RIGHT_ENCODER_ID_B = 7; // Encoder del lado derecho
         public static Translation2d FRONT_LEFT_POSITION;
 
     }

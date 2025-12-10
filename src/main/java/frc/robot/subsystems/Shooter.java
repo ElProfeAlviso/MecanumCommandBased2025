@@ -118,14 +118,14 @@ public class Shooter extends SubsystemBase {
   
 
   @Override
-  public void periodic() {/*
+  public void periodic() {
     // Envía los controles PID del Shooter al SmartDashboard para ajustes en tiempo real
     SmartDashboard.putData("PID Shooter", pidShooterSendable); 
 
     //PID Shooter Smartdashboard
     SmartDashboard.putNumber("Shooter Set Point", shooterSetPoint);
     SmartDashboard.putNumber("Shooter Velocity", shooterMotor.getEncoder().getVelocity());
-    SmartDashboard.putNumber("Shooter Output", shooterMotor.getAppliedOutput());*/
+    SmartDashboard.putNumber("Shooter Output", shooterMotor.getAppliedOutput());
 
     
   }

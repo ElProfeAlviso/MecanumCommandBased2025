@@ -127,7 +127,7 @@ public class Climber extends SubsystemBase {
   @Override
   public void periodic() {  
     
-    /* 
+    
 
     // Envía los controles PID del Climber al SmartDashboard para ajustes en tiempo real
     SmartDashboard.putData("PID Climber", pidClimberSendable);
@@ -141,7 +141,7 @@ public class Climber extends SubsystemBase {
     SmartDashboard.putNumber("Climber Output", climberMotor.getAppliedOutput());
     SmartDashboard.putBoolean("LLego a posicion", isAtPosition(climberSetPoint, 2));
     SmartDashboard.putBoolean("Climber PID Enabled", climberEnablePID);
-    SmartDashboard.putNumber("Climber Manual Speed", climberManualSpeed);*/
+    SmartDashboard.putNumber("Climber Manual Speed", climberManualSpeed);
     
   }
 }

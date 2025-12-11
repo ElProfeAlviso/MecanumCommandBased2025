@@ -19,14 +19,13 @@ import edu.wpi.first.wpilibj.AnalogTrigger;
 import edu.wpi.first.wpilibj.BuiltInAccelerometer;
 import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.DataLogManager;
-import edu.wpi.first.wpilibj.DigitalInput;
+//import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DutyCycleEncoder;
+//import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.I2C;
 import edu.wpi.first.wpilibj.PS4Controller;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
-import edu.wpi.first.wpilibj.drive.MecanumDrive;
 import edu.wpi.first.wpilibj.Servo;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
@@ -151,6 +150,12 @@ public class Sensores extends SubsystemBase {
 
     SmartDashboard.putData("PDP", PowerDistribution); // Publica el objeto del panel de distribución de energía
 
+    SmartDashboard.putData("Rio Acelerometro", accelerometer);
+    SmartDashboard.putData("Controller", driverController);
+    //SmartDashboard.putData("Encoder Absoluto", absoluteEncoder);
+   
+    SmartDashboard.putData("CANrange", canRange);
+
     // Inicia la captura automática de la primera cámara USB encontrada
     UsbCamera camera = CameraServer.startAutomaticCapture();
     camera.setResolution(320, 240); // Configura la resolución de la cámara
@@ -166,12 +171,10 @@ public class Sensores extends SubsystemBase {
 
   }
 
-  public void sendMecanumDrive(MecanumDrive mecanumDrive) {
-    SmartDashboard.putData("Chasis", mecanumDrive); // Publica el objeto del chasis mecanum
-  }
+ 
 
   @Override
-  public void periodic() {/* 
+  public void periodic() {
 
     
        
@@ -215,19 +218,16 @@ public class Sensores extends SubsystemBase {
     // Escritura y envio de datos de visualizacion en SmartDashboard Elastic
     
     SmartDashboard.putNumber("Counter", counter.get());
-    SmartDashboard.putData("Controller", driverController);
+   
     
     SmartDashboard.putNumber("Match Time", matchTime);
+    // SmartDashboard.putBoolean("Limit switch", limitSwitch.get());
+    //SmartDashboard.putBoolean("Sensor Inductivo", InductiveSensor.get());
+    SmartDashboard.putNumber("Temperatura PDP", PowerDistribution.getTemperature());
    
    // SmartDashboard.putBoolean("Magnetic Sensor", magneticSensor.get());
     SmartDashboard.putNumber("Ultrasonico", Ultrasonic.get());
-    SmartDashboard.putData("Rio Acelerometro", accelerometer);
    
-    //SmartDashboard.putData("Encoder Absoluto", absoluteEncoder);
-   // SmartDashboard.putBoolean("Limit switch", limitSwitch.get());
-    //SmartDashboard.putBoolean("Sensor Inductivo", InductiveSensor.get());
-    SmartDashboard.putNumber("Temperatura PDP", PowerDistribution.getTemperature());
-    SmartDashboard.putData("CANrange", canRange);
     SmartDashboard.putBoolean("ultrasonic trigger", ultrasonicTrigger.getTriggerState());
 
     // Color Sensor SmartDashboard
@@ -248,7 +248,7 @@ public class Sensores extends SubsystemBase {
 
 
     
-    // This method will be called once per scheduler run*/
+    // This method will be called once per scheduler run
   }
 }
 

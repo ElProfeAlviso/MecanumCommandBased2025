@@ -1,60 +1,43 @@
 
 package frc.robot.subsystems;
 
-
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import static edu.wpi.first.units.Units.Rotation;
-
-import java.util.List;
 import com.revrobotics.spark.SparkBase;
-import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+
 import com.studica.frc.AHRS;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.MecanumDriveKinematics;
 import edu.wpi.first.math.kinematics.MecanumDriveOdometry;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelPositions;
 import edu.wpi.first.math.kinematics.MecanumDriveWheelSpeeds;
+
 import edu.wpi.first.math.trajectory.Trajectory;
-import edu.wpi.first.math.trajectory.TrajectoryConfig;
-import edu.wpi.first.math.trajectory.TrajectoryGenerator;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.measure.LinearVelocity;
+
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.drive.MecanumDrive;
+
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-// Importación de la clase Constants que contiene las constantes del robot
+
 import frc.robot.Constants;
 
-/**
- * Clase DriveTrain que representa el subsistema del tren de manejo (drivetrain)
- * del robot.
- * Esta clase maneja la configuración y el control de los motores, encoders y
- * giroscopio del drivetrain Mecanum.
- */
 
 public class DriveTrain extends SubsystemBase {
 
-  // Feedforward para velocidad de rueda (ajusta tus constantes)
-private final SimpleMotorFeedforward ff = new SimpleMotorFeedforward(0.2, 2.0, 0.1); // kS, kV, kA (ejemplo)
-
-  // Declaración de los motores del drivetrain Mecanum
-  // Cada motor está asociado a un puerto específico definido en la clase
-  // Constants
   private final SparkMax frontLeftMotor = new SparkMax(Constants.DriveTrain.FRONT_LEFT_MOTOR_ID, MotorType.kBrushed);
   private final SparkMax rearLeftMotor = new SparkMax(Constants.DriveTrain.REAR_LEFT_MOTOR_ID, MotorType.kBrushed);
   private final SparkMax frontRightMotor = new SparkMax(Constants.DriveTrain.FRONT_RIGHT_MOTOR_ID, MotorType.kBrushed);
@@ -66,36 +49,19 @@ private final SimpleMotorFeedforward ff = new SimpleMotorFeedforward(0.2, 2.0, 0
   private final SparkMaxConfig frontRightMotorConfig = new SparkMaxConfig();
   private final SparkMaxConfig rearRightMotorConfig = new SparkMaxConfig();
 
-  
-
+ 
   private final Encoder frontLeftEncoder = new Encoder(Constants.DriveTrain.FRONT_LEFT_ENCODER_ID_A,
       Constants.DriveTrain.FRONT_LEFT_ENCODER_ID_B, false, Encoder.EncodingType.k4X);
-
  
   private final Encoder rearLeftEncoder = new Encoder(Constants.DriveTrain.REAR_LEFT_ENCODER_ID_A,
       Constants.DriveTrain.REAR_LEFT_ENCODER_ID_B, false, Encoder.EncodingType.k4X);
 
   private final Encoder frontRightEncoder = new Encoder(Constants.DriveTrain.FRONT_RIGHT_ENCODER_ID_A,
       Constants.DriveTrain.FRONT_RIGHT_ENCODER_ID_B, true, Encoder.EncodingType.k4X); // Encoder incremental en puertos
-                                                                                      // digitales 0 y 1
+
   private final Encoder rearRightEncoder = new Encoder(Constants.DriveTrain.REAR_RIGHT_ENCODER_ID_A,
       Constants.DriveTrain.REAR_RIGHT_ENCODER_ID_B, true, Encoder.EncodingType.k4X); // Encoder incremental en puertos
-                                                                                     // digitales 0 y 1
 
-  // Instancia de MecanumDrive para controlar el drivetrain Mecanum
-  // Este objeto se encarga de manejar la lógica de movimiento de los motores
-  private final MecanumDrive mecanumDrive;
-  private final MecanumDriveKinematics mecanumkinematics;
-  private final MecanumDriveOdometry mecanumodometry;
-
-  // Creacion de objeto de giroscopio y AHRS Navx
-  private final AHRS navx = new AHRS(AHRS.NavXComType.kMXP_SPI); // Giroscopio Navx conectado por SPI
-
-  private boolean fieldOriented = true; // Habilitar o deshabilitar el control Field Oriented Drive.
-
-  // Creacion de objeto Field 2D
-  private final Field2d field = new Field2d(); // Objeto para visualización del campo en 2D
-  // Publica la trayectoria en el SmartDashboard
   
 
 
@@ -111,18 +77,27 @@ private final SimpleMotorFeedforward ff = new SimpleMotorFeedforward(0.2, 2.0, 0
   private final SimpleMotorFeedforward ffRL = new SimpleMotorFeedforward(0.3, 2.2, 0.25);
   private final SimpleMotorFeedforward ffRR = new SimpleMotorFeedforward(0.3, 2.2, 0.25);
 
-  PIDController anglePID = new PIDController(0.01, 0.0, 0.0001); // Ajusta los valores según sea necesario
+ 
+
   
+  private final MecanumDriveKinematics mecanumkinematics;
+  private final MecanumDriveOdometry mecanumodometry;
+
+    
+  // Creacion de objeto de giroscopio y AHRS Navx
+  private final AHRS navx = new AHRS(AHRS.NavXComType.kMXP_SPI); // Giroscopio Navx conectado por SPI
+
+ 
+  // Creacion de objeto Field 2D
+  private final Field2d field = new Field2d(); // Objeto para visualización del campo en 2D
+  // Publica la trayectoria en el SmartDashboard
 
   // límites y constantes
   private final double kMaxWheelSpeedMps = 6.0; // ejemplo
   private final double kMaxPercent = 1.0;
+  private boolean fieldOriented = true; // Habilitar o deshabilitar el control Field Oriented Drive.
 
-  double moveAngle;
-  
-  
-
-  /**
+   /**
    * Constructor de la clase DriveTrain.
    * Aquí se inicializan las configuraciones de los motores y del sistema de
    * conducción.
@@ -136,7 +111,6 @@ private final SimpleMotorFeedforward ff = new SimpleMotorFeedforward(0.2, 2.0, 0
     frontRightMotorConfig.inverted(false).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
     rearRightMotorConfig.inverted(false).idleMode(IdleMode.kBrake).smartCurrentLimit(40);
 
-    
 
     // Aplicar las configuraciones a cada motor
     frontLeftMotor.configure(frontLeftMotorConfig, SparkBase.ResetMode.kResetSafeParameters,
@@ -148,9 +122,7 @@ private final SimpleMotorFeedforward ff = new SimpleMotorFeedforward(0.2, 2.0, 0
     rearRightMotor.configure(rearRightMotorConfig, SparkBase.ResetMode.kResetSafeParameters,
         SparkBase.PersistMode.kPersistParameters);
 
-    // Reinicia el giroscopio Navx para establecer el ángulo inicial en 0
-    navx.reset();
-
+    
     frontLeftEncoder.setSamplesToAverage(10); // Promedia 10 muestras para suavizar la lectura
     frontLeftEncoder.setDistancePerPulse((1.0 / 360 * (Math.PI * 6)) * 0.0254); // Configura la distancia por pulso en metros
     frontLeftEncoder.setMinRate(10); // Configura la tasa mínima de pulsos
@@ -161,7 +133,6 @@ private final SimpleMotorFeedforward ff = new SimpleMotorFeedforward(0.2, 2.0, 0
     rearLeftEncoder.setMinRate(10); // Configura la tasa mínima de pulsos
     rearLeftEncoder.reset(); // Resetea el encoder
     
-
     // Configuracion de encoders
     frontRightEncoder.setSamplesToAverage(10); // Promedia 10 muestras para suavizar la lectura
     frontRightEncoder.setDistancePerPulse((1.0 / 360 * (Math.PI * 6)) * 0.0254); // Configura la distancia por pulso en metros.
@@ -173,8 +144,7 @@ private final SimpleMotorFeedforward ff = new SimpleMotorFeedforward(0.2, 2.0, 0
     rearRightEncoder.setMinRate(10); // Configura la tasa mínima de pulsos
     rearRightEncoder.reset(); // Resetea el encoder
 
-    SmartDashboard.putBoolean("FOD", fieldOriented); // Publica el estado inicial de FOD
-
+    
     Translation2d frontLeftLocation = new Translation2d(0.29, 0.29); // Posición del motor delantero izquierdo  metros
     Translation2d rearLeftLocation = new Translation2d(-0.29, 0.29); // Posición del motor trasero izquierdo metros
     Translation2d frontRightLocation = new Translation2d(0.29, -0.29); // Posición del motor delantero derecho en metros
@@ -184,6 +154,7 @@ private final SimpleMotorFeedforward ff = new SimpleMotorFeedforward(0.2, 2.0, 0
 
     Pose2d initialPose = new Pose2d(0, 0, navxAngle);
 
+
     MecanumDriveWheelPositions initialWheelPositions = new MecanumDriveWheelPositions(
         frontLeftEncoder.getDistance(),
         frontRightEncoder.getDistance(),
@@ -192,24 +163,21 @@ private final SimpleMotorFeedforward ff = new SimpleMotorFeedforward(0.2, 2.0, 0
     );
 
     mecanumkinematics = new MecanumDriveKinematics(frontLeftLocation,frontRightLocation, rearLeftLocation, rearRightLocation);
-
-    mecanumDrive = new MecanumDrive(frontLeftMotor, rearLeftMotor, frontRightMotor, rearRightMotor);
-
+    
     mecanumodometry = new MecanumDriveOdometry(mecanumkinematics, navxAngle, initialWheelPositions, initialPose);
 
-    // Configuración del objeto MecanumDrive
-    mecanumDrive.setDeadband(0.03); // Zona muerta del joystick para evitar movimientos no deseados
-    mecanumDrive.setMaxOutput(1.0); // Salida máxima del sistema de conducción
-    mecanumDrive.setSafetyEnabled(true); // Habilitar el sistema de seguridad para evitar errores
-    mecanumDrive.setExpiration(0.1); // Tiempo de expiración del sistema de seguridad
+        
+// Reinicia el giroscopio Navx para establecer el ángulo inicial en 0
+navx.reset();
 
-    
-
-
+   
+    SmartDashboard.putBoolean("FOD", fieldOriented); // Publica el estado inicial de FOD   
+    SmartDashboard.putData("Navx Angle", navx);
     SmartDashboard.putData("Field", field);
-    //field.getObject("Trajectory").setTrajectory(m_trajectory);
-
-    anglePID.enableContinuousInput(-180, 180); // Ángulo continuo entre -180 y 180 grados
+    SmartDashboard.putData("Front Left Encoder", frontLeftEncoder);
+    SmartDashboard.putData("Rear Left Encoder", rearLeftEncoder);
+    SmartDashboard.putData("Front Right Encoder", frontRightEncoder);
+    SmartDashboard.putData("Rear Right Encoder", rearRightEncoder);
 
   }
   /**
@@ -221,7 +189,7 @@ private final SimpleMotorFeedforward ff = new SimpleMotorFeedforward(0.2, 2.0, 0
     * @param zRotation Rotación en el eje Z (girar)
     */
     public void MecanumDrive_Cartesian(double xSpeed, double ySpeed, double zRotation) {
-      mecanumDrive.feed();
+     
 
       // Aplicar deadband para evitar movimientos no deseados
       double deadband = 0.05; // Ajusta el valor según sea necesario
@@ -229,71 +197,23 @@ private final SimpleMotorFeedforward ff = new SimpleMotorFeedforward(0.2, 2.0, 0
       ySpeed = Math.abs(ySpeed) > deadband ? ySpeed : 0.0;
       zRotation = Math.abs(zRotation) > deadband ? zRotation : 0.0;
 
-      // Si está habilitado el control orientado al campo, ajusta las velocidades
-      Rotation2d navXAngle = Rotation2d.fromDegrees(-navx.getAngle());
-      ChassisSpeeds chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
+      ChassisSpeeds chassisSpeeds = new ChassisSpeeds(
         xSpeed * kMaxWheelSpeedMps, 
         ySpeed * -kMaxWheelSpeedMps, 
-        zRotation * -kMaxWheelSpeedMps, 
-        navXAngle);
-      MecanumDriveWheelSpeeds wheelSpeeds = mecanumkinematics.toWheelSpeeds(chassisSpeeds);
+        zRotation * -kMaxWheelSpeedMps); // Ajusta la velocidad máxima según sea necesario);
+       
+        driveWithSpeeds(chassisSpeeds);
 
-      // Limita las velocidades máximas
-      wheelSpeeds.desaturate(kMaxWheelSpeedMps);
 
-      // Objetivos de velocidad para cada rueda
-      double targetFL = wheelSpeeds.frontLeftMetersPerSecond;
-      double targetFR = wheelSpeeds.frontRightMetersPerSecond;
-      double targetRL = wheelSpeeds.rearLeftMetersPerSecond;
-      double targetRR = wheelSpeeds.rearRightMetersPerSecond;
-
-      // Mediciones actuales desde los encoders
-      double measFL = frontLeftEncoder.getRate();
-      double measFR = frontRightEncoder.getRate();
-      double measRL = rearLeftEncoder.getRate();
-      double measRR = rearRightEncoder.getRate();
-
-      // PID: salida en "unidad" (se interpretará como VOLTS cuando lo combine con FF)
-      double pidOutFL = pidFL.calculate(measFL, targetFL);
-      double pidOutFR = pidFR.calculate(measFR, targetFR);
-      double pidOutRL = pidRL.calculate(measRL, targetRL);
-      double pidOutRR = pidRR.calculate(measRR, targetRR);
-
-      // Feedforward (volts)
-      double ffVoltsFL = ffFL.calculate(targetFL);
-      double ffVoltsFR = ffFR.calculate(targetFR);
-      double ffVoltsRL = ffRL.calculate(targetRL);
-      double ffVoltsRR = ffRR.calculate(targetRR);
-
-      // Combinar: volts = ff + pidContributionScaled
-      double voltsFL = ffVoltsFL + pidOutFL;
-      double voltsFR = ffVoltsFR + pidOutFR;
-      double voltsRL = ffVoltsRL + pidOutRL;
-      double voltsRR = ffVoltsRR + pidOutRR;
-
-      // Normalizar a percent output usando tensión de batería actual
-      double battery = RobotController.getBatteryVoltage();
-      double percentFL = MathUtil.clamp(voltsFL / battery, -kMaxPercent, kMaxPercent);
-      double percentFR = MathUtil.clamp(voltsFR / battery, -kMaxPercent, kMaxPercent);
-      double percentRL = MathUtil.clamp(voltsRL / battery, -kMaxPercent, kMaxPercent);
-      double percentRR = MathUtil.clamp(voltsRR / battery, -kMaxPercent, kMaxPercent);
-
-      // Establecer la salida de los motores
-      frontLeftMotor.set(percentFL);
-      frontRightMotor.set(percentFR);
-      rearLeftMotor.set(percentRL);
-      rearRightMotor.set(percentRR);
     }
 
 
   //Control con ChassisSpeeds Con PID
-  public void driveWithSpeeds(ChassisSpeeds chassisSpeeds) {
-     
-    mecanumDrive.feed();
+  public void driveWithSpeeds(ChassisSpeeds chassisSpeeds) {    
 
   // Si quieres field-oriented, transforma a chassisSpeeds de campo:
   
-    Rotation2d heading = Rotation2d.fromDegrees(navx.getAngle());
+    Rotation2d heading = Rotation2d.fromDegrees(-navx.getAngle());
 
     chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
       chassisSpeeds.vxMetersPerSecond,
@@ -358,66 +278,7 @@ private final SimpleMotorFeedforward ff = new SimpleMotorFeedforward(0.2, 2.0, 0
 }
 
 
-  // Conduce usando kinematics -> wheel speeds
-/* 
-  //Control con ChassisSpeeds sin PID
-  public void driveWithSpeeds(ChassisSpeeds chassisSpeeds) {
-     
-      mecanumDrive.feed();
-
-    // Si quieres field-oriented, transforma a chassisSpeeds de campo:
-    
-      Rotation2d heading = Rotation2d.fromDegrees(navx.getAngle());
-
-      chassisSpeeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-        chassisSpeeds.vxMetersPerSecond,
-        chassisSpeeds.vyMetersPerSecond,
-        chassisSpeeds.omegaRadiansPerSecond,
-        heading);
-    
-
-    MecanumDriveWheelSpeeds wheelSpeeds = mecanumkinematics.toWheelSpeeds(chassisSpeeds);
-
-    wheelSpeeds.desaturate(kMaxWheelSpeedMps);
-
-    double frontLeftOutput = wheelSpeeds.frontLeftMetersPerSecond / kMaxWheelSpeedMps;
-    double frontRightOutput = wheelSpeeds.frontRightMetersPerSecond / kMaxWheelSpeedMps;
-    double rearLeftOutput = wheelSpeeds.rearLeftMetersPerSecond / kMaxWheelSpeedMps;
-    double rearRightOutput = wheelSpeeds.rearRightMetersPerSecond / kMaxWheelSpeedMps;
-
-    frontLeftMotor.set(frontLeftOutput);
-    frontRightMotor.set(frontRightOutput);
-    rearLeftMotor.set(rearLeftOutput);
-    rearRightMotor.set(rearRightOutput);
-
-    
-  }*/
-
-
-
-/* //Control de Chasis con MecanumDrive
-  public void driveWithSpeeds(ChassisSpeeds speeds){
-    double xSpeed = Math.max(-1, Math.min(1, speeds.vxMetersPerSecond));
-    double ySpeed = Math.max(-1, Math.min(1, speeds.vyMetersPerSecond));
-      double zRotation = speeds.omegaRadiansPerSecond;
-
-      if (fieldOriented) {
-          Rotation2d navXAngle = Rotation2d.fromDegrees(navx.getAngle());
-          mecanumDrive.driveCartesian(xSpeed, -ySpeed, zRotation, navXAngle);
-      } else {
-          mecanumDrive.driveCartesian(xSpeed, -ySpeed, zRotation);
-      }
-
-
-  } */
-
-  /**
-   * Método para detener todos los motores del drivetrain.
-   * Este método asegura que el robot se detenga completamente.
-   */
-  public void stopDrive() {
-    mecanumDrive.stopMotor();
-  }
+  
 
   /**
    * Método para obtener el ángulo actual del giroscopio Navx.
@@ -431,7 +292,6 @@ private final SimpleMotorFeedforward ff = new SimpleMotorFeedforward(0.2, 2.0, 0
 public boolean isFieldOriented() {
     return fieldOriented;
 }
-
 
   public double getGyroAngle() {
     return navx.getAngle();
@@ -562,15 +422,9 @@ public MecanumDriveWheelSpeeds getWheelSpeeds() {
 
     // Distancia en pulgadas con 2 decimales
     SmartDashboard.putNumber("Encoder en Distancia", getEncoderDistance());
-    SmartDashboard.putData("Encoder Relativo", frontRightEncoder);
-    SmartDashboard.putData("Navx Angle", navx);
+  
     SmartDashboard.putNumber("Navx Yaw", navx.getYaw());
-    SmartDashboard.putData("Chasis", mecanumDrive);
-
-    SmartDashboard.putData("Front Left Encoder", frontLeftEncoder);
-    SmartDashboard.putData("Rear Left Encoder", rearLeftEncoder);
-    SmartDashboard.putData("Front Right Encoder", frontRightEncoder);
-    SmartDashboard.putData("Rear Right Encoder", rearRightEncoder);
+   
 
 
   }

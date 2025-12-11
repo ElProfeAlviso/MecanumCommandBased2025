@@ -65,6 +65,9 @@ public class Climber extends SubsystemBase {
   /** Creates a new Elevator. */
   public Climber() {
 
+     // Envía los controles PID del Climber al SmartDashboard para ajustes en tiempo real
+     SmartDashboard.putData("PID Climber", pidClimberSendable);
+
     // Configuracion de motor de Climber
     climberMotorConfig.idleMode(IdleMode.kBrake); // Configura el modo de inactividad en freno
     climberMotorConfig.inverted(true); // Invierte el giro del motor
@@ -129,8 +132,7 @@ public class Climber extends SubsystemBase {
     
     
 
-    // Envía los controles PID del Climber al SmartDashboard para ajustes en tiempo real
-    SmartDashboard.putData("PID Climber", pidClimberSendable);
+   
 
     // Actualiza el SmartDashboard con la posición del encoder del Climber
     SmartDashboard.putNumber("Climber Position Encoder", climberMotor.getEncoder().getPosition());

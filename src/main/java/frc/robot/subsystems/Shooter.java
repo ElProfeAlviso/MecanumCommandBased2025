@@ -75,6 +75,9 @@ public class Shooter extends SubsystemBase {
     // Aplica la configuración al motor del shooter
     shooterMotor.configure(shooterMotorConfig, SparkBase.ResetMode.kResetSafeParameters, SparkBase.PersistMode.kPersistParameters);
 
+     // Envía los controles PID del Shooter al SmartDashboard para ajustes en tiempo real
+     SmartDashboard.putData("PID Shooter", pidShooterSendable); 
+
   }
 
   public void setShooterPIDSpeed(double setPoint) {
@@ -119,8 +122,7 @@ public class Shooter extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // Envía los controles PID del Shooter al SmartDashboard para ajustes en tiempo real
-    SmartDashboard.putData("PID Shooter", pidShooterSendable); 
+   
 
     //PID Shooter Smartdashboard
     SmartDashboard.putNumber("Shooter Set Point", shooterSetPoint);

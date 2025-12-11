@@ -53,7 +53,7 @@ public class DriveWithJoystick extends Command {
   @Override
   public void end(boolean interrupted) {
     // Detiene el robot cuando el comando finaliza.
-    driveTrain.stopDrive();
+    driveTrain.stopMotors();
   }
 
   // Método que indica si el comando ha terminado.

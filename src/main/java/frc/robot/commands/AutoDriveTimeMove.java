@@ -53,14 +53,14 @@ public class AutoDriveTimeMove extends Command {
     if (cronos.get() <= time) { // Si el tiempo transcurrido es menor o igual al tiempo deseado
       driveTrain.MecanumDrive_Cartesian(speed, 0, 0); // Mantén el movimiento hacia adelante
     } else {
-      driveTrain.stopDrive(); // Detén el robot
+      driveTrain.stopMotors(); // Detén el robot
     }
   }
 
   // Este método se llama una vez cuando el comando termina o es interrumpido.
   @Override
   public void end(boolean interrupted) {
-    driveTrain.stopDrive(); // Asegúrate de detener el robot
+    driveTrain.stopMotors(); // Asegúrate de detener el robot
     cronos.stop(); // Detén el temporizador
   }
 

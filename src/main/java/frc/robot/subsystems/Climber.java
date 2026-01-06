@@ -75,6 +75,7 @@ public class Climber extends SubsystemBase {
     climberMotorConfig.closedLoop.feedbackSensor(FeedbackSensor.kPrimaryEncoder); // Usa el encoder interno como sensor de retroalimentación
     climberMotorConfig.closedLoop.pid(0.1, 0, 0.001); // Valores PID ajustados manualmente (Usando Rev Hardware Client
     climberMotorConfig.closedLoop.outputRange(-1, 1); // Rango de salida del controlador PID
+    climberMotorConfig.closedLoop.maxMotion.maxAcceleration(2000).maxVelocity(4000).allowedClosedLoopError(1); // Velocidad máxima de crucero para Motion Magic
     climberSetPoint = 0; // Setpoint inicial del climber
 
     // Configuración de límites suaves (soft limits) del Climber
@@ -94,7 +95,7 @@ public class Climber extends SubsystemBase {
   public void setClimberPIDPosition(double setPoint) {    
     climberSetPoint = setPoint;
     climberEnablePID = true;    
-    climberPid.setReference(setPoint, ControlType.kPosition);
+    climberPid.setReference(setPoint, ControlType.kMAXMotionPositionControl);
   }
   // Método para habilitar o deshabilitar el control PID del Climber
   public void setEnableClimberPID(boolean enablePID) {
